@@ -16,12 +16,12 @@
       "description": "queen-bee L2: Review Leader（レビュー責任者）"
     },
     "QB_WORKER_CODER": {
-      "context": ["executor.md"],
+      "context": ["worker-base.md", "coder.md"],
       "skip_log": false,
       "description": "queen-bee L3: Worker（実装）"
     },
     "QB_WORKER_TESTER": {
-      "context": ["executor.md", "tester.md"],
+      "context": ["worker-base.md", "tester.md"],
       "skip_log": false,
       "description": "queen-bee L3: Worker（テスト作成）"
     },
