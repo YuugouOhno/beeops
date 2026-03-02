@@ -1,6 +1,6 @@
 ---
 name: qb-review-backend
-description: Triggered for backend code and API design reviews. [Required pair: qb-review-security] Targets: server-side code (.ts/.py etc.), API design docs (doc/design/api), domain models. Use qb-review-frontend for frontend, qb-review-database for DB.
+description: Triggered for backend code and API design reviews, INCLUDING after bugfixes and implementation changes. [Required pair: qb-review-security] Auto-trigger after any implementation/bugfix to server-side code (.ts/.js/.py etc., including CLI scripts like bin/*.js), API design docs (doc/design/api), domain models. Use qb-review-frontend for frontend, qb-review-database for DB.
 ---
 
 ## Usage Contract

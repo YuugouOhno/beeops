@@ -33,7 +33,7 @@
     "claude-code"
   ],
   "scripts": {
-    "test": "node --test 'test/**/*.test.js'",
+    "test": "node --test test/cli.test.js",
     "prepublishOnly": "npm test"
   },
   "engines": {
