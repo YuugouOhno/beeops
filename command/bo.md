@@ -17,7 +17,7 @@ BO_CONTEXTS_DIR="$PKG_DIR/contexts"
 SESSION="bo"
 
 tmux has-session -t "$SESSION" 2>/dev/null && {
-  echo "An existing qb session was found."
+  echo "An existing bo session was found."
   echo "  tmux attach -t bo   # monitor"
   echo "  tmux kill-session -t bo  # stop and restart"
   # Stop here. Let the user decide.

@@ -11,7 +11,7 @@ Record session work to `.claude/beeops/logs/log.jsonl` in JSONL format.
 
 1. Get log path and current timestamp:
    ```bash
-   LOG_BASE=$(python3 "$(dirname "$(python3 -c "import queen_bee; print(queen_bee.__file__)" 2>/dev/null || echo "$BO_CONTEXTS_DIR/../hooks/resolve-log-path.py")")/resolve-log-path.py" 2>/dev/null || python3 hooks/resolve-log-path.py) && mkdir -p "$LOG_BASE" && date '+%Y-%m-%dT%H:%M:%S'
+   LOG_BASE=$(python3 "$(dirname "$(python3 -c "import beeops; print(beeops.__file__)" 2>/dev/null || echo "$BO_CONTEXTS_DIR/../hooks/resolve-log-path.py")")/resolve-log-path.py" 2>/dev/null || python3 hooks/resolve-log-path.py) && mkdir -p "$LOG_BASE" && date '+%Y-%m-%dT%H:%M:%S'
    ```
    If the above fails, use the simpler fallback:
    ```bash
