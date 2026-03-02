@@ -1,6 +1,6 @@
 ---
-name: qb-review-database
-description: Triggered for DB schema, query, and migration reviews. [Required pair: qb-review-security] Targets: SQL, ORM schema definitions, DB design docs (doc/design/database). PostgreSQL-centric.
+name: bo-review-database
+description: Triggered for DB schema, query, and migration reviews. [Required pair: bo-review-security] Targets: SQL, ORM schema definitions, DB design docs (doc/design/database). PostgreSQL-centric.
 ---
 
 ## Usage Contract
@@ -8,7 +8,7 @@ description: Triggered for DB schema, query, and migration reviews. [Required pa
 When using this skill, always include the following at the beginning of your output:
 
 ```
-[SKILL_USED: qb-review-database]
+[SKILL_USED: bo-review-database]
 ```
 
 ---

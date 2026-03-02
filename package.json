@@ -1,19 +1,19 @@
 {
-  "name": "queen-bee",
+  "name": "beeops",
   "version": "0.1.0",
   "description": "3-layer multi-agent orchestration system (Queen → Leader → Worker) powered by tmux",
   "author": "YuugouOhno",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YuugouOhno/queen-bee.git"
+    "url": "git+https://github.com/YuugouOhno/beeops.git"
   },
-  "homepage": "https://github.com/YuugouOhno/queen-bee#readme",
+  "homepage": "https://github.com/YuugouOhno/beeops#readme",
   "bugs": {
-    "url": "https://github.com/YuugouOhno/queen-bee/issues"
+    "url": "https://github.com/YuugouOhno/beeops/issues"
   },
   "bin": {
-    "queen-bee": "./bin/queen-bee.js"
+    "beeops": "./bin/beeops.js"
   },
   "files": [
     "bin/",
@@ -29,7 +29,7 @@
     "tmux",
     "automation",
     "ai-agents",
-    "queen-bee",
+    "beeops",
     "claude-code"
   ],
   "scripts": {

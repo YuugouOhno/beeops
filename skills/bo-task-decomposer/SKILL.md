@@ -1,5 +1,5 @@
 ---
-name: qb-task-decomposer
+name: bo-task-decomposer
 description: "Decompose complex tasks into detailed, actionable TODOs. Each TODO is specific enough to be executed from its description alone."
 version: "1.0.0"
 context: fork

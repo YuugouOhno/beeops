@@ -1,99 +1,99 @@
 {
   "modes": {
-    "QB_FB_AGENT": {
+    "BO_FB_AGENT": {
       "context": ["log.md"],
       "skip_log": true,
-      "description": "queen-bee: log recording agent (session exit)"
+      "description": "beeops: log recording agent (session exit)"
     },
-    "QB_FB_INCLUDE_FB": {
+    "BO_FB_INCLUDE_FB": {
       "context": ["fb.md"],
       "skip_log": true,
-      "description": "queen-bee: log recording + self-improvement (10% chance)",
+      "description": "beeops: log recording + self-improvement (10% chance)",
       "append": true
     },
-    "QB_QUEEN": {
+    "BO_QUEEN": {
       "context": ["queen.md"],
       "skip_log": false,
-      "description": "queen-bee L1: Queen (orchestrator)"
+      "description": "beeops L1: Queen (orchestrator)"
     },
-    "QB_LEADER": {
+    "BO_LEADER": {
       "context": ["leader.md"],
       "skip_log": false,
-      "description": "queen-bee L2: Leader (implementation lead)"
+      "description": "beeops L2: Leader (implementation lead)"
     },
-    "QB_REVIEW_LEADER": {
+    "BO_REVIEW_LEADER": {
       "context": ["review-leader.md"],
       "skip_log": false,
-      "description": "queen-bee L2: Review Leader (review lead)"
+      "description": "beeops L2: Review Leader (review lead)"
     },
-    "QB_WORKER_CODER": {
+    "BO_WORKER_CODER": {
       "context": ["worker-base.md", "coder.md"],
       "skip_log": false,
-      "description": "queen-bee L3: Worker (implementation)"
+      "description": "beeops L3: Worker (implementation)"
     },
-    "QB_WORKER_TESTER": {
+    "BO_WORKER_TESTER": {
       "context": ["worker-base.md", "tester.md"],
       "skip_log": false,
-      "description": "queen-bee L3: Worker (test writing)"
+      "description": "beeops L3: Worker (test writing)"
     },
-    "QB_WORKER_CODE_REVIEWER": {
+    "BO_WORKER_CODE_REVIEWER": {
       "context": ["reviewer-base.md", "code-reviewer.md"],
       "skip_log": false,
-      "description": "queen-bee L3: Worker (code review)"
+      "description": "beeops L3: Worker (code review)"
     },
-    "QB_WORKER_SECURITY": {
+    "BO_WORKER_SECURITY": {
       "context": ["reviewer-base.md", "security-reviewer.md"],
       "skip_log": false,
-      "description": "queen-bee L3: Worker (security review)"
+      "description": "beeops L3: Worker (security review)"
     },
-    "QB_WORKER_TEST_AUDITOR": {
+    "BO_WORKER_TEST_AUDITOR": {
       "context": ["reviewer-base.md", "test-auditor.md"],
       "skip_log": false,
-      "description": "queen-bee L3: Worker (test audit)"
+      "description": "beeops L3: Worker (test audit)"
     }
   },
   "roles": {
     "leader": {
-      "env_var": "QB_LEADER",
+      "env_var": "BO_LEADER",
       "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
       "max_turns": 80,
-      "description": "queen-bee: implementation lead for an Issue"
+      "description": "beeops: implementation lead for an Issue"
     },
     "review-leader": {
-      "env_var": "QB_REVIEW_LEADER",
+      "env_var": "BO_REVIEW_LEADER",
       "allowed_tools": "Read Grep Glob Bash Skill",
       "max_turns": 40,
-      "description": "queen-bee: review lead for a PR"
+      "description": "beeops: review lead for a PR"
     },
     "worker-coder": {
-      "env_var": "QB_WORKER_CODER",
+      "env_var": "BO_WORKER_CODER",
       "allowed_tools": "Read Write Edit Bash Glob Grep",
       "max_turns": 30,
-      "description": "queen-bee: single subtask implementation"
+      "description": "beeops: single subtask implementation"
     },
     "worker-tester": {
-      "env_var": "QB_WORKER_TESTER",
+      "env_var": "BO_WORKER_TESTER",
       "allowed_tools": "Read Write Edit Bash Glob Grep",
       "max_turns": 30,
-      "description": "queen-bee: test writing for a subtask"
+      "description": "beeops: test writing for a subtask"
     },
     "worker-code-reviewer": {
-      "env_var": "QB_WORKER_CODE_REVIEWER",
+      "env_var": "BO_WORKER_CODE_REVIEWER",
       "allowed_tools": "Read Grep Glob Bash",
       "max_turns": 15,
-      "description": "queen-bee: code quality review"
+      "description": "beeops: code quality review"
     },
     "worker-security": {
-      "env_var": "QB_WORKER_SECURITY",
+      "env_var": "BO_WORKER_SECURITY",
       "allowed_tools": "Read Grep Glob Bash",
       "max_turns": 15,
-      "description": "queen-bee: security review"
+      "description": "beeops: security review"
     },
     "worker-test-auditor": {
-      "env_var": "QB_WORKER_TEST_AUDITOR",
+      "env_var": "BO_WORKER_TEST_AUDITOR",
       "allowed_tools": "Read Grep Glob Bash",
       "max_turns": 15,
-      "description": "queen-bee: test audit"
+      "description": "beeops: test audit"
     }
   },
   "default_context": "default.md"

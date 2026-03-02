@@ -2,7 +2,7 @@
 # launch-leader.sh - Launch Leader or Review Leader in a tmux window (with git worktree isolation)
 # Usage: launch-leader.sh <role> <issue> <branch> [fix]
 #
-# Part of queen-bee: 3-layer multi-agent system (Queen → Leader → Worker)
+# Part of beeops: 3-layer multi-agent system (Queen → Leader → Worker)
 #
 # Features:
 # - tmux new-window: each issue gets its own window (not pane)
@@ -16,7 +16,7 @@ ROLE="$1"
 ISSUE="$2"
 BRANCH="$3"
 FIX_MODE="${4:-}"
-SESSION="qb"
+SESSION="bo"
 REPO_DIR="$(git rev-parse --show-toplevel)"
 REPORTS_DIR="$REPO_DIR/.claude/tasks/reports"
 PROMPTS_DIR="$REPO_DIR/.claude/tasks/prompts"
@@ -28,7 +28,7 @@ mkdir -p "$REPORTS_DIR/processed" "$PROMPTS_DIR" "$WORKTREES_DIR"
 case "$ROLE" in
   leader)
     ROLE_SHORT="leader"
-    ENV_VAR="QB_LEADER"
+    ENV_VAR="BO_LEADER"
     WINDOW_NAME="issue-${ISSUE}"
     BORDER_FG="blue"
     ROLE_ICON="👑"
@@ -37,7 +37,7 @@ case "$ROLE" in
     ;;
   review-leader)
     ROLE_SHORT="review-leader"
-    ENV_VAR="QB_REVIEW_LEADER"
+    ENV_VAR="BO_REVIEW_LEADER"
     WINDOW_NAME="review-${ISSUE}"
     BORDER_FG="magenta"
     ROLE_ICON="🔮"
@@ -96,7 +96,7 @@ else
 case "$ROLE" in
   leader)
     cat > "$PROMPT_FILE" <<PROMPT_EOF
-You are a Leader agent (queen-bee L2).
+You are a Leader agent (beeops L2).
 You are responsible for completing the implementation of GitHub Issue #${ISSUE}.
 
 ## Work Environment
@@ -108,8 +108,8 @@ You are responsible for completing the implementation of GitHub Issue #${ISSUE}.
 
 ## Procedure
 1. Review the issue: gh issue view ${ISSUE} --json body,title,labels
-2. Skill: qb-task-decomposer to decompose into subtasks
-3. Skill: qb-leader-dispatch to launch Workers in parallel
+2. Skill: bo-task-decomposer to decompose into subtasks
+3. Skill: bo-leader-dispatch to launch Workers in parallel
 4. Evaluate Worker reports for quality (re-run up to 2 times if unsatisfactory)
 5. After all subtasks are complete, perform a self-critical review (read the PR diff and verify alignment with Issue requirements)
 6. Write ${REPORTS_DIR}/leader-${ISSUE}-summary.yaml
@@ -144,7 +144,7 @@ PROMPT_EOF
 
   review-leader)
     cat > "$PROMPT_FILE" <<PROMPT_EOF
-You are a Review Leader agent (queen-bee L2).
+You are a Review Leader agent (beeops L2).
 You are responsible for reviewing the PR for Issue #${ISSUE}.
 
 ## Work Environment
@@ -157,7 +157,7 @@ You are responsible for reviewing the PR for Issue #${ISSUE}.
 ## Procedure
 1. Review the PR diff: gh pr diff --name-only && gh pr diff
 2. Determine complexity (simple/standard/complex)
-3. Skill: qb-leader-dispatch to launch Review Workers in parallel
+3. Skill: bo-leader-dispatch to launch Review Workers in parallel
 4. Aggregate Worker findings + perform anti-sycophancy check
 5. Write ${REPORTS_DIR}/review-leader-${ISSUE}-verdict.yaml
 6. Send tmux wait-for -S queen-wake
@@ -165,16 +165,16 @@ You are responsible for reviewing the PR for Issue #${ISSUE}.
 ## Complexity Rules
 | Complexity | Criteria | Workers to Launch |
 |------------|----------|-------------------|
-| simple | Changed files <= 2 and all are config/docs | worker-reviewer only |
-| complex | Changed files >= 5, includes auth/migration | worker-reviewer + worker-security + worker-test-auditor |
-| standard | Everything else | worker-reviewer + worker-security |
+| simple | Changed files <= 2 and all are config/docs | worker-code-reviewer only |
+| complex | Changed files >= 5, includes auth/migration | worker-code-reviewer + worker-security + worker-test-auditor |
+| standard | Everything else | worker-code-reviewer + worker-security |
 
 ## Report Format (review-leader-${ISSUE}-verdict.yaml)
 \`\`\`yaml
 issue: ${ISSUE}
 role: review-leader
 complexity: standard
-council_members: [worker-reviewer, worker-security]
+council_members: [worker-code-reviewer, worker-security]
 final_verdict: approve  # approve | fix_required
 anti_sycophancy_triggered: false
 merged_findings:
@@ -215,16 +215,16 @@ BRANCH="${BRANCH}"
 WORKTREE_PATH="${WORKTREE_PATH}"
 MAX_TURNS="${MAX_TURNS}"
 ALLOWED_TOOLS="${ALLOWED_TOOLS}"
-QB_SCRIPTS_DIR="${QB_SCRIPTS_DIR:-}"
-QB_CONTEXTS_DIR="${QB_CONTEXTS_DIR:-}"
+BO_SCRIPTS_DIR="${BO_SCRIPTS_DIR:-}"
+BO_CONTEXTS_DIR="${BO_CONTEXTS_DIR:-}"
 
 cd "\$WORK_DIR"
 
 # Run agent
 unset CLAUDECODE
 env \${ENV_VAR}=1 \
-  QB_SCRIPTS_DIR="\$QB_SCRIPTS_DIR" \
-  QB_CONTEXTS_DIR="\$QB_CONTEXTS_DIR" \
+  BO_SCRIPTS_DIR="\$BO_SCRIPTS_DIR" \
+  BO_CONTEXTS_DIR="\$BO_CONTEXTS_DIR" \
   claude --dangerously-skip-permissions \
   --allowedTools "\$ALLOWED_TOOLS" \
   --max-turns \$MAX_TURNS \
@@ -259,7 +259,7 @@ tmux wait-for -S queen-wake 2>/dev/null || true
 
 # Note: worktree is intentionally kept alive after Leader completion.
 # The branch is needed for PR review cycles and CI checks.
-# Cleanup happens after PR merge (managed by Queen via qb-dispatch).
+# Cleanup happens after PR merge (managed by Queen via bo-dispatch).
 
 echo "--- \$ROLE completed (exit=\$EXIT_CODE) ---"
 WRAPPER_BODY

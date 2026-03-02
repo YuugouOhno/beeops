@@ -26,8 +26,8 @@ def _find_resolve_script() -> Path | None:
     """Find resolve-log-path.py via multiple strategies."""
     import os
 
-    # Strategy 1: QB_CONTEXTS_DIR env var
-    ctx_dir = os.environ.get("QB_CONTEXTS_DIR")
+    # Strategy 1: BO_CONTEXTS_DIR env var
+    ctx_dir = os.environ.get("BO_CONTEXTS_DIR")
     if ctx_dir:
         candidate = Path(ctx_dir).parent / "hooks" / "resolve-log-path.py"
         if candidate.exists():
@@ -41,7 +41,7 @@ def _find_resolve_script() -> Path | None:
     # Strategy 3: require.resolve
     try:
         pkg_dir = subprocess.run(
-            ["node", "-e", "console.log(require.resolve('queen-bee/package.json').replace('/package.json',''))"],
+            ["node", "-e", "console.log(require.resolve('beeops/package.json').replace('/package.json',''))"],
             capture_output=True, text=True, check=True,
         ).stdout.strip()
         candidate = Path(pkg_dir) / "hooks" / "resolve-log-path.py"
@@ -62,7 +62,7 @@ def resolve_log_base() -> Path:
         )
         return Path(result.stdout.strip())
     # Fallback
-    return Path.cwd() / ".claude" / "queen-bee" / "logs"
+    return Path.cwd() / ".claude" / "beeops" / "logs"
 
 
 # ---------------------------------------------------------------------------

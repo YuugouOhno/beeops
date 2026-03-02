@@ -1,5 +1,5 @@
 ---
-name: qb-review-operations
+name: bo-review-operations
 description: "[Limited trigger] Triggered only for infrastructure, deployment, and monitoring configuration reviews. Targets: Dockerfile, k8s, CI/CD, monitoring config, operations docs. Not triggered for normal code reviews. SLO/SLA, availability, logging, incident response."
 ---
 
@@ -8,7 +8,7 @@ description: "[Limited trigger] Triggered only for infrastructure, deployment, a
 When using this skill, always include the following at the beginning of your output:
 
 ```
-[SKILL_USED: qb-review-operations]
+[SKILL_USED: bo-review-operations]
 ```
 
 ---
@@ -212,7 +212,7 @@ Detection -> Triage -> Mitigation -> Root Cause Analysis -> Prevention
 
 ## Security Operations
 
-See qb-review-security for details.
+See bo-review-security for details.
 
 - [ ] Is secret rotation automated?
 - [ ] Are vulnerability scans run regularly?

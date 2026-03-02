@@ -1,21 +1,21 @@
 ---
-name: qb-log-writer
+name: bo-log-writer
 description: Record work logs to JSONL. Extract changes, decisions, error resolutions, and learnings from git diff and conversation context.
 ---
 
-# qb-log-writer: Work Log Recording
+# bo-log-writer: Work Log Recording
 
-Record session work to `.claude/queen-bee/logs/log.jsonl` in JSONL format.
+Record session work to `.claude/beeops/logs/log.jsonl` in JSONL format.
 
 ## Procedure
 
 1. Get log path and current timestamp:
    ```bash
-   LOG_BASE=$(python3 "$(dirname "$(python3 -c "import queen_bee; print(queen_bee.__file__)" 2>/dev/null || echo "$QB_CONTEXTS_DIR/../hooks/resolve-log-path.py")")/resolve-log-path.py" 2>/dev/null || python3 hooks/resolve-log-path.py) && mkdir -p "$LOG_BASE" && date '+%Y-%m-%dT%H:%M:%S'
+   LOG_BASE=$(python3 "$(dirname "$(python3 -c "import queen_bee; print(queen_bee.__file__)" 2>/dev/null || echo "$BO_CONTEXTS_DIR/../hooks/resolve-log-path.py")")/resolve-log-path.py" 2>/dev/null || python3 hooks/resolve-log-path.py) && mkdir -p "$LOG_BASE" && date '+%Y-%m-%dT%H:%M:%S'
    ```
    If the above fails, use the simpler fallback:
    ```bash
-   LOG_BASE=".claude/queen-bee/logs" && mkdir -p "$LOG_BASE" && date '+%Y-%m-%dT%H:%M:%S'
+   LOG_BASE=".claude/beeops/logs" && mkdir -p "$LOG_BASE" && date '+%Y-%m-%dT%H:%M:%S'
    ```
 2. Check changed files with `git diff --name-only` and `git status`
 3. Extract work content, intent, errors, and learnings from conversation context
@@ -46,7 +46,7 @@ One line = one JSON object per work unit. All entries appended to a single file.
   "learnings": ["Reusable insights"],
   "patterns": ["Recurring patterns observed"],
   "remaining": ["Unresolved issues / TODOs"],
-  "skills_used": ["qb-task-decomposer"],
+  "skills_used": ["bo-task-decomposer"],
   "agents_used": ["code-reviewer", "planner"],
   "commands_used": ["commit", "review"],
   "resources_created": [{ "type": "skill", "name": "meta-task-planner", "action": "created" }]

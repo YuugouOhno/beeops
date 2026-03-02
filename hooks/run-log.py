@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Stop hook: Launch a background log-recording agent on session exit.
 
-100% chance: run qb-log-writer (work log recording).
-~10% chance: additionally run qb-self-improver (self-improvement analysis).
+100% chance: run bo-log-writer (work log recording).
+~10% chance: additionally run bo-self-improver (self-improvement analysis).
 
 Reads hook input (transcript_path etc.) from stdin, extracts session context,
 and embeds it into the prompt so the agent can record accurately without -c.
@@ -42,16 +42,16 @@ stop_hook_active = hook_input.get("stop_hook_active", False)
 # Loop prevention: skip if agent-modes.json marks this mode as skip_log
 _skip_log = stop_hook_active
 
-# Resolve agent-modes.json path via QB_CONTEXTS_DIR or package detection
+# Resolve agent-modes.json path via BO_CONTEXTS_DIR or package detection
 _modes_file = None
-_ctx_dir = os.environ.get("QB_CONTEXTS_DIR")
+_ctx_dir = os.environ.get("BO_CONTEXTS_DIR")
 if _ctx_dir:
     _modes_file = Path(_ctx_dir) / "agent-modes.json"
 else:
     # Try to resolve via require.resolve
     try:
         pkg_dir = subprocess.run(
-            ["node", "-e", "console.log(require.resolve('queen-bee/package.json').replace('/package.json',''))"],
+            ["node", "-e", "console.log(require.resolve('beeops/package.json').replace('/package.json',''))"],
             capture_output=True, text=True, check=True,
         ).stdout.strip()
         _modes_file = Path(pkg_dir) / "contexts" / "agent-modes.json"
@@ -279,7 +279,7 @@ def format_turns_summary(turns: list[Turn], max_chars: int = 12000) -> str:
 # --- Resolve log directory via resolve-log-path.py ---
 cwd = Path.cwd()
 
-# Find resolve-log-path.py: QB_CONTEXTS_DIR -> package detection -> fallback
+# Find resolve-log-path.py: BO_CONTEXTS_DIR -> package detection -> fallback
 _resolve_script = None
 if _ctx_dir:
     _candidate = Path(_ctx_dir).parent / "hooks" / "resolve-log-path.py"
@@ -288,7 +288,7 @@ if _ctx_dir:
 if not _resolve_script:
     try:
         pkg_dir = subprocess.run(
-            ["node", "-e", "console.log(require.resolve('queen-bee/package.json').replace('/package.json',''))"],
+            ["node", "-e", "console.log(require.resolve('beeops/package.json').replace('/package.json',''))"],
             capture_output=True, text=True, check=True,
         ).stdout.strip()
         _candidate = Path(pkg_dir) / "hooks" / "resolve-log-path.py"
@@ -309,7 +309,7 @@ try:
         raise FileNotFoundError("resolve-log-path.py not found")
 except Exception:
     project_name = cwd.name
-    LOG_DIR = cwd / ".claude" / "queen-bee" / "logs"
+    LOG_DIR = cwd / ".claude" / "beeops" / "logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- log-pending.jsonl one-time cleanup ---
@@ -343,7 +343,7 @@ else:
 log_file_path = LOG_DIR / "log.jsonl"
 
 prompt = f"""\
-Invoke qb-log-writer skill via Skill tool to record the previous session's work log.
+Invoke bo-log-writer skill via Skill tool to record the previous session's work log.
 
 ## Log file path (fixed — do not change)
 
@@ -374,7 +374,7 @@ Use file changes and commands as-is; no need to re-verify with git diff.
 if include_fb:
     prompt += """
 ## Additional task: Self-improvement
-After log recording is complete, invoke qb-self-improver skill via Skill tool.
+After log recording is complete, invoke bo-self-improver skill via Skill tool.
 """
 
 mode = "log + fb" if include_fb else "log"
@@ -391,23 +391,23 @@ max_turns = min(6 + turn_count * 2, 25)
 
 bash_script = f"""\
 #!/bin/bash
-osascript -e 'display notification "mode: {mode}" with title "QB Log Agent: started"' 2>/dev/null
+osascript -e 'display notification "mode: {mode}" with title "BO Log Agent: started"' 2>/dev/null
 claude --model sonnet --no-session-persistence --allowedTools {allowed_tools} --max-turns {max_turns} -p '{escaped_prompt}' > '{LOG_DIR}/temp.log' 2>&1
 EXIT_CODE=$?
 if [ $EXIT_CODE -eq 0 ]; then
-    osascript -e 'display notification "mode: {mode}" with title "QB Log Agent: done"' 2>/dev/null
+    osascript -e 'display notification "mode: {mode}" with title "BO Log Agent: done"' 2>/dev/null
 else
-    osascript -e 'display notification "exit: '$EXIT_CODE'" with title "QB Log Agent: error"' 2>/dev/null
+    osascript -e 'display notification "exit: '$EXIT_CODE'" with title "BO Log Agent: error"' 2>/dev/null
 fi
 exit $EXIT_CODE
 """
 
 try:
     env = os.environ.copy()
-    env["QB_FB_AGENT"] = "1"
-    env["QB_LOG_DIR"] = str(LOG_DIR)
+    env["BO_FB_AGENT"] = "1"
+    env["BO_LOG_DIR"] = str(LOG_DIR)
     if include_fb:
-        env["QB_FB_INCLUDE_FB"] = "1"
+        env["BO_FB_INCLUDE_FB"] = "1"
 
     with tempfile.NamedTemporaryFile(mode="w", suffix=".sh", delete=False) as tmp:
         tmp.write(bash_script)
@@ -423,7 +423,7 @@ try:
         stderr=subprocess.DEVNULL,
         start_new_session=True,
     )
-    print(f"qb log agent started in background [{mode}]")
+    print(f"bo log agent started in background [{mode}]")
 except Exception as e:
-    print(f"qb log agent failed to start: {e}", file=sys.stderr)
+    print(f"bo log agent failed to start: {e}", file=sys.stderr)
     sys.exit(1)

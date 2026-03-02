@@ -2,7 +2,7 @@
 
 ## 手順
 
-`qb-self-improver` スキルを Skill tool で発動して自己改善分析を実行する。
+`bo-self-improver` スキルを Skill tool で発動して自己改善分析を実行する。
 分析が完了したら即座に終了する。
 
 ## 禁止事項

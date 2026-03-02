@@ -113,10 +113,10 @@
 
 レビュースキルが利用可能な場合、変更ファイルの種類に応じた専門レビュースキルを発動する:
 
-- フロントエンド変更（`.tsx`, `.vue`, `.jsx`, `.css`）→ `qb-review-frontend` + `qb-review-security` スキルを発動
-- バックエンド変更（`.ts`, `.py`, サーバーサイドコード）→ `qb-review-backend` + `qb-review-security` スキルを発動
-- DB関連変更（`.sql`, `prisma`, `migration`）→ `qb-review-database` + `qb-review-security` スキルを発動
-- インフラ変更（`Dockerfile`, `k8s`, CI/CD）→ `qb-review-operations` スキルを発動
+- フロントエンド変更（`.tsx`, `.vue`, `.jsx`, `.css`）→ `bo-review-frontend` + `bo-review-security` スキルを発動
+- バックエンド変更（`.ts`, `.py`, サーバーサイドコード）→ `bo-review-backend` + `bo-review-security` スキルを発動
+- DB関連変更（`.sql`, `prisma`, `migration`）→ `bo-review-database` + `bo-review-security` スキルを発動
+- インフラ変更（`Dockerfile`, `k8s`, CI/CD）→ `bo-review-operations` スキルを発動
 
 該当スキルがインストールされていない場合はルーティングをスキップし、上記の観点でレビューする。
 

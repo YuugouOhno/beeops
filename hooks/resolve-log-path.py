@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Resolve the log directory path for the current project.
 
-Priority: QB_LOG_DIR env var > git root detection > cwd fallback.
-Default log location: <project>/.claude/queen-bee/logs/
+Priority: BO_LOG_DIR env var > git root detection > cwd fallback.
+Default log location: <project>/.claude/beeops/logs/
 
 Usage:
     python3 resolve-log-path.py          # Print LOG_BASE path
@@ -60,20 +60,20 @@ def resolve_log_base() -> Path:
     """Resolve log base directory.
 
     Priority:
-    1. QB_LOG_DIR environment variable (absolute path)
-    2. <git-root>/.claude/queen-bee/logs/
-    3. <cwd>/.claude/queen-bee/logs/
+    1. BO_LOG_DIR environment variable (absolute path)
+    2. <git-root>/.claude/beeops/logs/
+    3. <cwd>/.claude/beeops/logs/
     """
     import os
-    env_dir = os.environ.get("QB_LOG_DIR")
+    env_dir = os.environ.get("BO_LOG_DIR")
     if env_dir:
         return Path(env_dir)
 
     git_root = resolve_git_root()
     if git_root:
-        return git_root / ".claude" / "queen-bee" / "logs"
+        return git_root / ".claude" / "beeops" / "logs"
 
-    return Path.cwd() / ".claude" / "queen-bee" / "logs"
+    return Path.cwd() / ".claude" / "beeops" / "logs"
 
 
 def main():

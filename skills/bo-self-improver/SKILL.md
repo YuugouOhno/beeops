@@ -1,10 +1,10 @@
 ---
-name: qb-self-improver
+name: bo-self-improver
 description: Analyze accumulated log JSONL to automatically improve skills, commands, and agents. Runs automatically on session exit.
 argument-hint: ["scan" or date]
 ---
 
-# qb-self-improver: Self-Improvement
+# bo-self-improver: Self-Improvement
 
 Analyze accumulated log JSONL to improve skills, commands, and agents.
 
@@ -23,7 +23,7 @@ Resources exist in two layers: global and project. **Scan both.**
 ### 1. Run Analysis Script (Automates Steps 1-4)
 
 ```bash
-python3 .claude/skills/qb-self-improver/scripts/analyze.py
+python3 .claude/skills/bo-self-improver/scripts/analyze.py
 ```
 
 The script performs all of the following in batch and outputs JSON:
@@ -95,12 +95,12 @@ Based on Steps 1-3, improve resources following the reference documents below.
 | Commands | `refs/command-manager.md` | Creation/update/merge/deletion criteria, format |
 | Agents | `refs/agent-manager.md` | Creation/merge/deletion criteria, format |
 
-After executing improvements, record to `log.jsonl` via qb-log-writer. Include creation/update details in the `resources_created` field.
+After executing improvements, record to `log.jsonl` via bo-log-writer. Include creation/update details in the `resources_created` field.
 
 ### 5. Update Cursor
 
 ```bash
-python3 .claude/skills/qb-self-improver/scripts/analyze.py --update-cursor
+python3 .claude/skills/bo-self-improver/scripts/analyze.py --update-cursor
 ```
 
 ### 6. Persist Analysis Results & Record to Log
@@ -136,7 +136,7 @@ python3 .claude/skills/qb-self-improver/scripts/analyze.py --update-cursor
 - ...
 ```
 
-2. **Log recording**: Record improvement actions to `log.jsonl` via qb-log-writer skill format.
+2. **Log recording**: Record improvement actions to `log.jsonl` via bo-log-writer skill format.
 
 ## Rules
 

@@ -1,6 +1,6 @@
 ---
-name: qb-review-frontend
-description: Triggered for frontend code and component design reviews. [Required pair: qb-review-security] Targets: React/Vue etc. (.tsx/.vue), frontend design docs (doc/design/frontend). Use qb-review-backend for backend, qb-review-database for DB.
+name: bo-review-frontend
+description: Triggered for frontend code and component design reviews. [Required pair: bo-review-security] Targets: React/Vue etc. (.tsx/.vue), frontend design docs (doc/design/frontend). Use bo-review-backend for backend, bo-review-database for DB.
 ---
 
 ## Usage Contract
@@ -8,7 +8,7 @@ description: Triggered for frontend code and component design reviews. [Required
 When using this skill, always include the following at the beginning of your output:
 
 ```
-[SKILL_USED: qb-review-frontend]
+[SKILL_USED: bo-review-frontend]
 ```
 
 ---

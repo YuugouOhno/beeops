@@ -1,6 +1,6 @@
 ---
-name: qb-review-security
-description: "[Cross-cutting skill] Always triggered in pair with qb-review-backend/frontend/database during code reviews. Checks authentication, authorization, encryption, and input validation. OAuth 2.1, Zero Trust, mTLS, OWASP countermeasures."
+name: bo-review-security
+description: "[Cross-cutting skill] Always triggered in pair with bo-review-backend/frontend/database during code reviews. Checks authentication, authorization, encryption, and input validation. OAuth 2.1, Zero Trust, mTLS, OWASP countermeasures."
 ---
 
 ## Usage Contract
@@ -8,7 +8,7 @@ description: "[Cross-cutting skill] Always triggered in pair with qb-review-back
 When using this skill, always include the following at the beginning of your output:
 
 ```
-[SKILL_USED: qb-review-security]
+[SKILL_USED: bo-review-security]
 ```
 
 ---

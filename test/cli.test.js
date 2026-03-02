@@ -7,9 +7,9 @@ const fs = require('node:fs');
 const os = require('node:os');
 
 const execFileAsync = promisify(execFile);
-const CLI = path.join(__dirname, '..', 'bin', 'queen-bee.js');
+const CLI = path.join(__dirname, '..', 'bin', 'beeops.js');
 
-describe('queen-bee CLI', () => {
+describe('beeops CLI', () => {
   it('--help shows usage and exits 0', async () => {
     const { stdout } = await execFileAsync(process.execPath, [CLI, '--help']);
     assert.match(stdout, /Usage:/);
@@ -36,7 +36,7 @@ describe('queen-bee CLI', () => {
     });
 
     it('check errors outside a git repo', async () => {
-      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'qb-test-'));
+      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bo-test-'));
       try {
         await execFileAsync(process.execPath, [CLI, 'check'], { cwd: tmpDir });
         assert.fail('Expected command to exit with non-zero code');

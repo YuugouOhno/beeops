@@ -2,7 +2,7 @@
 
 ## 手順
 
-`qb-log-writer` スキルを Skill tool で発動してログを記録する。
+`bo-log-writer` スキルを Skill tool で発動してログを記録する。
 ログ記録が完了したら即座に終了する。
 
 ## 禁止事項

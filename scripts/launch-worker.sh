@@ -2,7 +2,7 @@
 # launch-worker.sh - Launch Worker in a tmux split-pane (within Leader's window)
 # Usage: launch-worker.sh <role> <issue> <subtask_id> <branch>
 #
-# Part of queen-bee: 3-layer multi-agent system (Queen → Leader → Worker)
+# Part of beeops: 3-layer multi-agent system (Queen → Leader → Worker)
 #
 # Features:
 # - tmux split-window -h: adds pane within Leader's window
@@ -16,7 +16,7 @@ ROLE="$1"
 ISSUE="$2"
 SUBTASK_ID="$3"
 BRANCH="$4"
-SESSION="qb"
+SESSION="bo"
 REPO_DIR="$(git rev-parse --show-toplevel)"
 REPORTS_DIR="$REPO_DIR/.claude/tasks/reports"
 PROMPTS_DIR="$REPO_DIR/.claude/tasks/prompts"
@@ -27,7 +27,7 @@ mkdir -p "$REPORTS_DIR/processed" "$PROMPTS_DIR"
 case "$ROLE" in
   worker-coder)
     ROLE_SHORT="worker-coder"
-    ENV_VAR="QB_WORKER_CODER"
+    ENV_VAR="BO_WORKER_CODER"
     WINDOW_NAME="issue-${ISSUE}"
     BORDER_FG="green"
     ROLE_ICON="⚡"
@@ -36,7 +36,7 @@ case "$ROLE" in
     ;;
   worker-tester)
     ROLE_SHORT="worker-tester"
-    ENV_VAR="QB_WORKER_TESTER"
+    ENV_VAR="BO_WORKER_TESTER"
     WINDOW_NAME="issue-${ISSUE}"
     BORDER_FG="cyan"
     ROLE_ICON="🧪"
@@ -45,7 +45,7 @@ case "$ROLE" in
     ;;
   worker-code-reviewer)
     ROLE_SHORT="worker-code-reviewer"
-    ENV_VAR="QB_WORKER_CODE_REVIEWER"
+    ENV_VAR="BO_WORKER_CODE_REVIEWER"
     WINDOW_NAME="review-${ISSUE}"
     BORDER_FG="blue"
     ROLE_ICON="🔍"
@@ -54,7 +54,7 @@ case "$ROLE" in
     ;;
   worker-security)
     ROLE_SHORT="worker-security"
-    ENV_VAR="QB_WORKER_SECURITY"
+    ENV_VAR="BO_WORKER_SECURITY"
     WINDOW_NAME="review-${ISSUE}"
     BORDER_FG="red"
     ROLE_ICON="🛡"
@@ -63,7 +63,7 @@ case "$ROLE" in
     ;;
   worker-test-auditor)
     ROLE_SHORT="worker-test-auditor"
-    ENV_VAR="QB_WORKER_TEST_AUDITOR"
+    ENV_VAR="BO_WORKER_TEST_AUDITOR"
     WINDOW_NAME="review-${ISSUE}"
     BORDER_FG="yellow"
     ROLE_ICON="🧪"
@@ -115,16 +115,16 @@ BRANCH="${BRANCH}"
 SIGNAL_NAME="${SIGNAL_NAME}"
 MAX_TURNS="${MAX_TURNS}"
 ALLOWED_TOOLS="${ALLOWED_TOOLS}"
-QB_SCRIPTS_DIR="${QB_SCRIPTS_DIR:-}"
-QB_CONTEXTS_DIR="${QB_CONTEXTS_DIR:-}"
+BO_SCRIPTS_DIR="${BO_SCRIPTS_DIR:-}"
+BO_CONTEXTS_DIR="${BO_CONTEXTS_DIR:-}"
 
 cd "\$WORK_DIR"
 
 # Run agent
 unset CLAUDECODE
 env \${ENV_VAR}=1 \
-  QB_SCRIPTS_DIR="\$QB_SCRIPTS_DIR" \
-  QB_CONTEXTS_DIR="\$QB_CONTEXTS_DIR" \
+  BO_SCRIPTS_DIR="\$BO_SCRIPTS_DIR" \
+  BO_CONTEXTS_DIR="\$BO_CONTEXTS_DIR" \
   claude --dangerously-skip-permissions \
   --allowedTools "\$ALLOWED_TOOLS" \
   --max-turns \$MAX_TURNS \

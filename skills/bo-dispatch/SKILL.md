@@ -1,9 +1,9 @@
 ---
-name: qb-dispatch
-description: Launch Leader/Review Leader in tmux windows, wait for completion, read reports, and determine next action. Queen's dispatch skill for queen-bee.
+name: bo-dispatch
+description: Launch Leader/Review Leader in tmux windows, wait for completion, read reports, and determine next action. Queen's dispatch skill for beeops.
 ---
 
-# qb-dispatch: Leader launch + completion wait + report processing
+# bo-dispatch: Leader launch + completion wait + report processing
 
 Operational skill for the Queen to delegate issues to Leaders and Review Leaders.
 Provides agent visualization via tmux windows, event-driven completion waiting, and next-action determination based on reports.
@@ -14,13 +14,13 @@ Provides agent visualization via tmux windows, event-driven completion waiting, 
 
 ```bash
 # Implementation Leader
-bash $QB_SCRIPTS_DIR/launch-leader.sh leader {issue_number} {branch}
+bash $BO_SCRIPTS_DIR/launch-leader.sh leader {issue_number} {branch}
 
 # Review Leader
-bash $QB_SCRIPTS_DIR/launch-leader.sh review-leader {issue_number} {branch}
+bash $BO_SCRIPTS_DIR/launch-leader.sh review-leader {issue_number} {branch}
 
 # Fix mode (reuse existing worktree/branch)
-bash $QB_SCRIPTS_DIR/launch-leader.sh leader {issue_number} {branch} fix
+bash $BO_SCRIPTS_DIR/launch-leader.sh leader {issue_number} {branch} fix
 ```
 
 `launch-leader.sh` automatically performs the following:
@@ -61,7 +61,7 @@ Check `.claude/tasks/reports/`:
 ### State check on timeout
 
 ```bash
-tmux list-panes -t qb:{window_name} -F '#{@agent_label} #{pane_current_command}' 2>/dev/null
+tmux list-panes -t bo:{window_name} -F '#{@agent_label} #{pane_current_command}' 2>/dev/null
 ```
 
 | State | Meaning | Action |
@@ -122,7 +122,7 @@ design_decisions:
 issue: 42
 role: review-leader
 complexity: standard
-council_members: [worker-reviewer, worker-security]
+council_members: [worker-code-reviewer, worker-security]
 final_verdict: approve    # approve | fix_required
 anti_sycophancy_triggered: false
 merged_findings:
@@ -262,8 +262,8 @@ Resources have different lifecycles. Clean up each at the right time.
 After task reaches done, stuck, or error, kill the tmux windows:
 
 ```bash
-tmux kill-window -t qb:issue-{N} 2>/dev/null || true
-tmux kill-window -t qb:review-{N} 2>/dev/null || true
+tmux kill-window -t bo:issue-{N} 2>/dev/null || true
+tmux kill-window -t bo:review-{N} 2>/dev/null || true
 ```
 
 ### Worktrees and branches — after PR merge
@@ -292,7 +292,7 @@ fi
 
 ### Session-end cleanup
 
-When the Queen session ends (`tmux kill-session -t qb`), prune any stale worktree references:
+When the Queen session ends (`tmux kill-session -t bo`), prune any stale worktree references:
 
 ```bash
 git worktree prune

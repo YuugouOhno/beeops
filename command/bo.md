@@ -1,4 +1,4 @@
-Launch a Queen session (queen-bee) in tmux and auto-display it.
+Launch a Queen session (beeops) in tmux and auto-display it.
 queue.yaml generation and management is handled entirely by the Queen inside tmux.
 
 ## Execution steps
@@ -6,20 +6,20 @@ queue.yaml generation and management is handled entirely by the Queen inside tmu
 ### Step 0: Resolve package paths
 
 ```bash
-PKG_DIR=$(node -e "console.log(require.resolve('queen-bee/package.json').replace('/package.json',''))")
-QB_SCRIPTS_DIR="$PKG_DIR/scripts"
-QB_CONTEXTS_DIR="$PKG_DIR/contexts"
+PKG_DIR=$(node -e "console.log(require.resolve('beeops/package.json').replace('/package.json',''))")
+BO_SCRIPTS_DIR="$PKG_DIR/scripts"
+BO_CONTEXTS_DIR="$PKG_DIR/contexts"
 ```
 
 ### Step 1: Check for existing session
 
 ```bash
-SESSION="qb"
+SESSION="bo"
 
 tmux has-session -t "$SESSION" 2>/dev/null && {
   echo "An existing qb session was found."
-  echo "  tmux attach -t qb   # monitor"
-  echo "  tmux kill-session -t qb  # stop and restart"
+  echo "  tmux attach -t bo   # monitor"
+  echo "  tmux kill-session -t bo  # stop and restart"
   # Stop here. Let the user decide.
 }
 ```
@@ -32,7 +32,7 @@ If an existing session is found, display instructions and **stop**. The user mus
 CWD=$(pwd)
 
 tmux new-session -d -s "$SESSION" -n queen -c "$CWD" \
-  "unset CLAUDECODE; QB_QUEEN=1 QB_SCRIPTS_DIR='$QB_SCRIPTS_DIR' QB_CONTEXTS_DIR='$QB_CONTEXTS_DIR' claude --dangerously-skip-permissions; echo '--- Done (press Enter to close) ---'; read"
+  "unset CLAUDECODE; BO_QUEEN=1 BO_SCRIPTS_DIR='$BO_SCRIPTS_DIR' BO_CONTEXTS_DIR='$BO_CONTEXTS_DIR' claude --dangerously-skip-permissions; echo '--- Done (press Enter to close) ---'; read"
 ```
 
 ### Step 2.5: Configure tmux pane display
@@ -60,12 +60,12 @@ case "$(uname -s)" in
     osascript -e '
     tell application "Terminal"
       activate
-      do script "tmux attach -t qb"
+      do script "tmux attach -t bo"
     end tell
-    ' 2>/dev/null || echo "Open a new terminal and run: tmux attach -t qb"
+    ' 2>/dev/null || echo "Open a new terminal and run: tmux attach -t bo"
     ;;
   *)
-    echo "Queen session started. Attach with: tmux attach -t qb"
+    echo "Queen session started. Attach with: tmux attach -t bo"
     ;;
 esac
 ```
@@ -107,10 +107,10 @@ tmux send-keys -t "$SESSION:queen" Enter
 After startup, display:
 
 ```
-Queen started (queen-bee). tmux session displayed.
+Queen started (beeops). tmux session displayed.
   queen window: main control loop
   issue-{N}/review-{N}: Leader/Worker windows are added automatically
-  tmux kill-session -t qb  # to stop
+  tmux kill-session -t bo  # to stop
 ```
 
 ## Notes

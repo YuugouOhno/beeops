@@ -1,5 +1,5 @@
 ---
-name: qb-review-process
+name: bo-review-process
 description: "[Meta skill] Triggered only for review process quality questions and improvements. Targets: PR writing, comment conventions, review team structure and rules. Not triggered during actual code reviews."
 ---
 
@@ -8,7 +8,7 @@ description: "[Meta skill] Triggered only for review process quality questions a
 When using this skill, always include the following at the beginning of your output:
 
 ```
-[SKILL_USED: qb-review-process]
+[SKILL_USED: bo-review-process]
 ```
 
 ---

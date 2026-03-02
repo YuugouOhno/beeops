@@ -1,9 +1,9 @@
-# queen-bee
+# beeops
 
-[![npm version](https://img.shields.io/npm/v/queen-bee)](https://www.npmjs.com/package/queen-bee)
-[![license](https://img.shields.io/npm/l/queen-bee)](https://github.com/YuugouOhno/queen-bee/blob/main/LICENSE)
-[![CI](https://github.com/YuugouOhno/queen-bee/actions/workflows/ci.yml/badge.svg)](https://github.com/YuugouOhno/queen-bee/actions/workflows/ci.yml)
-[![Node.js](https://img.shields.io/node/v/queen-bee)](https://nodejs.org)
+[![npm version](https://img.shields.io/npm/v/beeops)](https://www.npmjs.com/package/beeops)
+[![license](https://img.shields.io/npm/l/beeops)](https://github.com/YuugouOhno/beeops/blob/main/LICENSE)
+[![CI](https://github.com/YuugouOhno/beeops/actions/workflows/ci.yml/badge.svg)](https://github.com/YuugouOhno/beeops/actions/workflows/ci.yml)
+[![Node.js](https://img.shields.io/node/v/beeops)](https://nodejs.org)
 
 3-layer multi-agent orchestration system (Queen → Leader → Worker) for [Claude Code](https://docs.anthropic.com/en/docs/claude-code), powered by tmux.
 
@@ -19,13 +19,13 @@
 ## Installation
 
 ```bash
-npm install queen-bee
-npx queen-bee init
+npm install beeops
+npx beeops init
 ```
 
 ## Quick Start
 
-Run `/qb` in Claude Code to start the Queen. She'll sync GitHub Issues, dispatch Leaders to git worktrees, and manage the full workflow — from implementation through code review and CI checks.
+Run `/bo` in Claude Code to start the Queen. She'll sync GitHub Issues, dispatch Leaders to git worktrees, and manage the full workflow — from implementation through code review and CI checks.
 
 ```
 Queen (orchestrator)
@@ -40,7 +40,7 @@ Queen (orchestrator)
 
 Each layer runs as a separate Claude Code instance in a tmux pane. Communication flows through YAML reports and `tmux wait-for` signals. No external servers or databases required.
 
-Attach with `tmux attach -t qb` to watch all agents work in real-time.
+Attach with `tmux attach -t bo` to watch all agents work in real-time.
 
 ## Architecture
 
@@ -56,7 +56,7 @@ Workers receive multi-layer context injection (base + specialization), so each r
 ## Configuration
 
 ```bash
-npx queen-bee init [options]
+npx beeops init [options]
 ```
 
 | Option | Description |
@@ -67,12 +67,12 @@ npx queen-bee init [options]
 | `--with-contexts` | Copy default context files locally for customization |
 | `--locale <lang>` | Set locale (`en` default, `ja` available) |
 
-To customize agent behavior, run `npx queen-bee init --with-contexts` and edit files in `.claude/queen-bee/contexts/`. Delete any file to fall back to the package default.
+To customize agent behavior, run `npx beeops init --with-contexts` and edit files in `.claude/beeops/contexts/`. Delete any file to fall back to the package default.
 
 To verify your installation:
 
 ```bash
-npx queen-bee check
+npx beeops check
 ```
 
 ## License

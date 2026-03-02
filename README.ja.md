@@ -1,4 +1,4 @@
-# queen-bee
+# beeops
 
 [English README](README.md)
 
@@ -44,46 +44,46 @@ Worker は**多層コンテキスト注入**（ベース＋専門特化）を受
 
 ```bash
 # インストール
-npm install queen-bee
+npm install beeops
 
 # プロジェクトで初期化
 cd your-project
-npx queen-bee init
+npx beeops init
 
 # Claude Code から起動
-# Claude Code で /qb と入力
+# Claude Code で /bo と入力
 ```
 
 以下がインストールされます：
-- `/qb` スラッシュコマンド
+- `/bo` スラッシュコマンド
 - 4つのスキル（dispatch, leader-dispatch, task-decomposer, issue-sync）
 - コンテキスト注入用の UserPromptSubmit フック
 
 ## init オプション
 
 ```bash
-npx queen-bee init                    # .claude/settings.local.json にフック登録（デフォルト）
-npx queen-bee init --shared           # .claude/settings.json にフック登録（チーム共有）
-npx queen-bee init --global           # ~/.claude/settings.json にフック登録（全プロジェクト）
-npx queen-bee init --with-contexts    # カスタマイズ用にコンテキストファイルをコピー
-npx queen-bee init --locale ja        # ロケールを日本語に設定
+npx beeops init                    # .claude/settings.local.json にフック登録（デフォルト）
+npx beeops init --shared           # .claude/settings.json にフック登録（チーム共有）
+npx beeops init --global           # ~/.claude/settings.json にフック登録（全プロジェクト）
+npx beeops init --with-contexts    # カスタマイズ用にコンテキストファイルをコピー
+npx beeops init --locale ja        # ロケールを日本語に設定
 ```
 
 ## 多言語サポート
 
-queen-bee はエージェントプロンプトの多言語ロケールに対応しています。現在利用可能：**en**（英語、デフォルト）、**ja**（日本語）。
+beeops はエージェントプロンプトの多言語ロケールに対応しています。現在利用可能：**en**（英語、デフォルト）、**ja**（日本語）。
 
 ```bash
 # init 時に設定
-npx queen-bee init --locale ja
+npx beeops init --locale ja
 
 # 実行時にオーバーライド
-QB_LOCALE=ja /qb
+BO_LOCALE=ja /bo
 ```
 
 コンテキストファイルは 4段階のフォールバックで解決されます：
-1. プロジェクトローカル＋ロケール (`<project>/.claude/queen-bee/contexts/<locale>/<file>`)
-2. プロジェクトローカル・ルート (`<project>/.claude/queen-bee/contexts/<file>`)
+1. プロジェクトローカル＋ロケール (`<project>/.claude/beeops/contexts/<locale>/<file>`)
+2. プロジェクトローカル・ルート (`<project>/.claude/beeops/contexts/<file>`)
 3. パッケージ＋ロケール (`<pkg>/contexts/<locale>/<file>`)
 4. パッケージ・ルート (`<pkg>/contexts/<file>`)
 
@@ -91,10 +91,10 @@ QB_LOCALE=ja /qb
 
 ```bash
 # デフォルトコンテキストを編集用にコピー
-npx queen-bee init --with-contexts
+npx beeops init --with-contexts
 ```
 
-プロジェクト内に `.claude/queen-bee/contexts/` が作成されます。任意のファイルを編集してエージェントの動作をカスタマイズできます。ファイルを削除するとパッケージのデフォルトにフォールバックします。
+プロジェクト内に `.claude/beeops/contexts/` が作成されます。任意のファイルを編集してエージェントの動作をカスタマイズできます。ファイルを削除するとパッケージのデフォルトにフォールバックします。
 
 主要ファイル：
 - `queen.md` — Queen オーケストレータープロンプト
@@ -124,7 +124,7 @@ npx queen-bee init --with-contexts
 ### tmux レイアウト
 
 ```
-tmux session "qb"
+tmux session "bo"
 ├── [queen]     👑 Queen オーケストレーター（金枠）
 ├── [issue-42]  👑 Issue #42 の Leader（青枠）
 │   ├── pane 0: Leader
@@ -137,12 +137,12 @@ tmux session "qb"
     └── pane 3: 🧪 Worker (test-auditor, 黄枠)
 ```
 
-`tmux attach -t qb` で全エージェントの動作をリアルタイムに確認できます。
+`tmux attach -t bo` で全エージェントの動作をリアルタイムに確認できます。
 
 ## 検証
 
 ```bash
-npx queen-bee check
+npx beeops check
 ```
 
 コマンド、スキル、フック登録、パッケージ解決など、すべてのコンポーネントが正しくインストールされているか検証します。

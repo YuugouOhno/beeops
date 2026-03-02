@@ -6,7 +6,7 @@ const path = require("path");
 const { execSync } = require("child_process");
 
 const PKG_DIR = path.resolve(__dirname, "..");
-const COMMAND_SRC = path.join(PKG_DIR, "command", "qb.md");
+const COMMAND_SRC = path.join(PKG_DIR, "command", "bo.md");
 const SKILLS_SRC = path.join(PKG_DIR, "skills");
 const CONTEXTS_SRC = path.join(PKG_DIR, "contexts");
 const HOOKS_DIR = path.join(PKG_DIR, "hooks");
@@ -207,59 +207,59 @@ function init(opts) {
   const root = getProjectRoot();
   const claudeDir = path.join(root, ".claude");
 
-  console.log(`Initializing queen-bee in ${root}...\n`);
+  console.log(`Initializing beeops in ${root}...\n`);
 
   // 1. Copy command
-  copyFile(COMMAND_SRC, path.join(claudeDir, "commands", "qb.md"));
+  copyFile(COMMAND_SRC, path.join(claudeDir, "commands", "bo.md"));
 
   // 2. Copy skills
   copyDir(
-    path.join(SKILLS_SRC, "qb-dispatch"),
-    path.join(claudeDir, "skills", "qb-dispatch")
+    path.join(SKILLS_SRC, "bo-dispatch"),
+    path.join(claudeDir, "skills", "bo-dispatch")
   );
   copyDir(
-    path.join(SKILLS_SRC, "qb-leader-dispatch"),
-    path.join(claudeDir, "skills", "qb-leader-dispatch")
+    path.join(SKILLS_SRC, "bo-leader-dispatch"),
+    path.join(claudeDir, "skills", "bo-leader-dispatch")
   );
   copyDir(
-    path.join(SKILLS_SRC, "qb-task-decomposer"),
-    path.join(claudeDir, "skills", "qb-task-decomposer")
+    path.join(SKILLS_SRC, "bo-task-decomposer"),
+    path.join(claudeDir, "skills", "bo-task-decomposer")
   );
   copyDir(
-    path.join(SKILLS_SRC, "qb-issue-sync"),
-    path.join(claudeDir, "skills", "qb-issue-sync")
+    path.join(SKILLS_SRC, "bo-issue-sync"),
+    path.join(claudeDir, "skills", "bo-issue-sync")
   );
   copyDir(
-    path.join(SKILLS_SRC, "qb-log-writer"),
-    path.join(claudeDir, "skills", "qb-log-writer")
+    path.join(SKILLS_SRC, "bo-log-writer"),
+    path.join(claudeDir, "skills", "bo-log-writer")
   );
   copyDir(
-    path.join(SKILLS_SRC, "qb-self-improver"),
-    path.join(claudeDir, "skills", "qb-self-improver")
+    path.join(SKILLS_SRC, "bo-self-improver"),
+    path.join(claudeDir, "skills", "bo-self-improver")
   );
   copyDir(
-    path.join(SKILLS_SRC, "qb-review-backend"),
-    path.join(claudeDir, "skills", "qb-review-backend")
+    path.join(SKILLS_SRC, "bo-review-backend"),
+    path.join(claudeDir, "skills", "bo-review-backend")
   );
   copyDir(
-    path.join(SKILLS_SRC, "qb-review-frontend"),
-    path.join(claudeDir, "skills", "qb-review-frontend")
+    path.join(SKILLS_SRC, "bo-review-frontend"),
+    path.join(claudeDir, "skills", "bo-review-frontend")
   );
   copyDir(
-    path.join(SKILLS_SRC, "qb-review-database"),
-    path.join(claudeDir, "skills", "qb-review-database")
+    path.join(SKILLS_SRC, "bo-review-database"),
+    path.join(claudeDir, "skills", "bo-review-database")
   );
   copyDir(
-    path.join(SKILLS_SRC, "qb-review-operations"),
-    path.join(claudeDir, "skills", "qb-review-operations")
+    path.join(SKILLS_SRC, "bo-review-operations"),
+    path.join(claudeDir, "skills", "bo-review-operations")
   );
   copyDir(
-    path.join(SKILLS_SRC, "qb-review-process"),
-    path.join(claudeDir, "skills", "qb-review-process")
+    path.join(SKILLS_SRC, "bo-review-process"),
+    path.join(claudeDir, "skills", "bo-review-process")
   );
   copyDir(
-    path.join(SKILLS_SRC, "qb-review-security"),
-    path.join(claudeDir, "skills", "qb-review-security")
+    path.join(SKILLS_SRC, "bo-review-security"),
+    path.join(claudeDir, "skills", "bo-review-security")
   );
 
   // 3. Clean up old names if exists
@@ -272,36 +272,36 @@ function init(opts) {
     const oldDir = path.join(claudeDir, "skills", old);
     if (fs.existsSync(oldDir)) {
       fs.rmSync(oldDir, { recursive: true });
-      console.log(`  removed: .claude/skills/${old}/ (migrated to qb-*)`);
+      console.log(`  removed: .claude/skills/${old}/ (migrated to bo-*)`);
     }
   }
   // Old command file
   const oldCmd = path.join(claudeDir, "commands", "ants.md");
   if (fs.existsSync(oldCmd)) {
     fs.unlinkSync(oldCmd);
-    console.log("  removed: .claude/commands/ants.md (migrated to qb.md)");
+    console.log("  removed: .claude/commands/ants.md (migrated to bo.md)");
   }
 
   // 4. Register hooks (UserPromptSubmit + Stop + PostToolUse)
   updateSettingsHook(root, opts.hookMode);
 
   // 5. Save locale preference
-  const qbDir = path.join(claudeDir, "queen-bee");
+  const qbDir = path.join(claudeDir, "beeops");
   ensureDir(qbDir);
   fs.writeFileSync(path.join(qbDir, "locale"), opts.locale + "\n");
-  console.log(`  locale: ${opts.locale} (saved to .claude/queen-bee/locale)`);
+  console.log(`  locale: ${opts.locale} (saved to .claude/beeops/locale)`);
 
   // 6. Copy contexts if --with-contexts
   if (opts.withContexts) {
-    const destContexts = path.join(claudeDir, "queen-bee", "contexts");
+    const destContexts = path.join(claudeDir, "beeops", "contexts");
     copyDir(CONTEXTS_SRC, destContexts);
-    console.log("\n  Contexts copied to .claude/queen-bee/contexts/ for customization.");
+    console.log("\n  Contexts copied to .claude/beeops/contexts/ for customization.");
     console.log("  Edit these files to customize agent behavior.");
     console.log("  Delete a file to fall back to the package default.");
   }
 
-  console.log("\nqueen-bee initialized successfully!");
-  console.log("Run /qb in Claude Code to start the Queen.");
+  console.log("\nbeeops initialized successfully!");
+  console.log("Run /bo in Claude Code to start the Queen.");
 }
 
 // ── check ──
@@ -330,23 +330,23 @@ function check() {
   const claudeDir = path.join(root, ".claude");
   let ok = true;
 
-  console.log("Checking queen-bee setup...\n");
+  console.log("Checking beeops setup...\n");
 
   // Check command
-  const cmdPath = path.join(claudeDir, "commands", "qb.md");
+  const cmdPath = path.join(claudeDir, "commands", "bo.md");
   if (fs.existsSync(cmdPath)) {
-    console.log("  [ok] .claude/commands/qb.md");
+    console.log("  [ok] .claude/commands/bo.md");
   } else {
-    console.log("  [missing] .claude/commands/qb.md");
+    console.log("  [missing] .claude/commands/bo.md");
     ok = false;
   }
 
   // Check skills
   const CORE_SKILLS = [
-    "qb-dispatch", "qb-leader-dispatch", "qb-task-decomposer", "qb-issue-sync",
-    "qb-log-writer", "qb-self-improver",
-    "qb-review-backend", "qb-review-frontend", "qb-review-database",
-    "qb-review-operations", "qb-review-process", "qb-review-security",
+    "bo-dispatch", "bo-leader-dispatch", "bo-task-decomposer", "bo-issue-sync",
+    "bo-log-writer", "bo-self-improver",
+    "bo-review-backend", "bo-review-frontend", "bo-review-database",
+    "bo-review-operations", "bo-review-process", "bo-review-security",
   ];
   for (const skill of CORE_SKILLS) {
     const skillPath = path.join(claudeDir, "skills", skill, "SKILL.md");
@@ -392,33 +392,33 @@ function check() {
   }
 
   // Check local contexts (informational)
-  const localContexts = path.join(claudeDir, "queen-bee", "contexts");
+  const localContexts = path.join(claudeDir, "beeops", "contexts");
   if (fs.existsSync(localContexts)) {
     const files = fs.readdirSync(localContexts);
-    console.log(`  [info] .claude/queen-bee/contexts/ (${files.length} custom file(s))`);
+    console.log(`  [info] .claude/beeops/contexts/ (${files.length} custom file(s))`);
   }
 
   // Check package resolvable
   try {
-    require.resolve("queen-bee/package.json");
-    console.log("  [ok] queen-bee package resolvable");
+    require.resolve("beeops/package.json");
+    console.log("  [ok] beeops package resolvable");
   } catch {
-    console.log("  [warn] queen-bee package not resolvable from cwd");
+    console.log("  [warn] beeops package not resolvable from cwd");
   }
 
-  console.log(ok ? "\nAll checks passed!" : "\nSome checks failed. Run: npx queen-bee init");
+  console.log(ok ? "\nAll checks passed!" : "\nSome checks failed. Run: npx beeops init");
   process.exit(ok ? 0 : 1);
 }
 
 // ── Help / Version ──
 
 function printHelp() {
-  console.log("queen-bee — 3-layer multi-agent orchestration for Claude Code\n");
-  console.log("Usage: queen-bee <command> [options]\n");
+  console.log("beeops — 3-layer multi-agent orchestration for Claude Code\n");
+  console.log("Usage: beeops <command> [options]\n");
   console.log("Commands:");
-  console.log("  init    Install queen-bee into the current project");
-  console.log("  update  Update queen-bee files (same as init)");
-  console.log("  check   Verify queen-bee setup\n");
+  console.log("  init    Install beeops into the current project");
+  console.log("  update  Update beeops files (same as init)");
+  console.log("  check   Verify beeops setup\n");
   console.log("Options for init/update:");
   console.log("  --local          Register hook in .claude/settings.local.json (default)");
   console.log("  --shared         Register hook in .claude/settings.json (team-shared)");
@@ -426,15 +426,15 @@ function printHelp() {
   console.log("  --with-contexts  Copy default contexts for customization");
   console.log("  --locale <lang>  Set locale (default: en, available: en, ja)\n");
   console.log("Examples:");
-  console.log("  npx queen-bee init");
-  console.log("  npx queen-bee init --shared --locale ja");
-  console.log("  npx queen-bee init --with-contexts");
-  console.log("  npx queen-bee check");
+  console.log("  npx beeops init");
+  console.log("  npx beeops init --shared --locale ja");
+  console.log("  npx beeops init --with-contexts");
+  console.log("  npx beeops check");
 }
 
 function printVersion() {
   const pkg = JSON.parse(fs.readFileSync(path.join(PKG_DIR, "package.json"), "utf8"));
-  console.log(`queen-bee v${pkg.version}`);
+  console.log(`beeops v${pkg.version}`);
 }
 
 // ── Argument parsing ──

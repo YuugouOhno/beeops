@@ -113,10 +113,10 @@ Code quality is not optional. Every line of code is read more than it is written
 
 When review skills are available, invoke specialized review skills based on the type of changed files:
 
-- Frontend changes (`.tsx`, `.vue`, `.jsx`, `.css`) → Invoke `qb-review-frontend` + `qb-review-security` skills
-- Backend changes (`.ts`, `.py`, server-side code) → Invoke `qb-review-backend` + `qb-review-security` skills
-- Database changes (`.sql`, `prisma`, `migration`) → Invoke `qb-review-database` + `qb-review-security` skills
-- Infrastructure changes (`Dockerfile`, `k8s`, CI/CD) → Invoke `qb-review-operations` skill
+- Frontend changes (`.tsx`, `.vue`, `.jsx`, `.css`) → Invoke `bo-review-frontend` + `bo-review-security` skills
+- Backend changes (`.ts`, `.py`, server-side code) → Invoke `bo-review-backend` + `bo-review-security` skills
+- Database changes (`.sql`, `prisma`, `migration`) → Invoke `bo-review-database` + `bo-review-security` skills
+- Infrastructure changes (`Dockerfile`, `k8s`, CI/CD) → Invoke `bo-review-operations` skill
 
 If the relevant skills are not installed, skip routing and review using the perspectives above.
 

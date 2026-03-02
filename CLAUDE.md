@@ -1,23 +1,23 @@
-# queen-bee
+# beeops
 
 3-layer multi-agent orchestration system for Claude Code (Queen → Leader → Worker).
 
 ## Package Overview
 
-Run `/qb` in Claude Code to launch a tmux-based multi-agent system.
-Install with `npm install queen-bee` + `npx queen-bee init` in any project.
+Run `/bo` in Claude Code to launch a tmux-based multi-agent system.
+Install with `npm install beeops` + `npx beeops init` in any project.
 
 ## Core Design: Environment Variable Chain
 
 Eliminates hardcoded paths by dynamically resolving the package install location:
 
 ```
-/qb execution → PKG_DIR resolved via require.resolve('queen-bee/package.json')
-  → QB_SCRIPTS_DIR="$PKG_DIR/scripts"
-  → QB_CONTEXTS_DIR="$PKG_DIR/contexts"
+/bo execution → PKG_DIR resolved via require.resolve('beeops/package.json')
+  → BO_SCRIPTS_DIR="$PKG_DIR/scripts"
+  → BO_CONTEXTS_DIR="$PKG_DIR/contexts"
   → Injected as env vars when starting tmux session
-  → Queen → launch-leader.sh (bakes QB_* into wrapper)
-  → Leader → launch-worker.sh (bakes QB_* into wrapper)
+  → Queen → launch-leader.sh (bakes BO_* into wrapper)
+  → Leader → launch-worker.sh (bakes BO_* into wrapper)
   → Worker execution
 ```
 
@@ -26,8 +26,8 @@ Eliminates hardcoded paths by dynamically resolving the package install location
 prompt-context.py resolves context files in the following order:
 
 ```
-1. Project local (locale): <project>/.claude/queen-bee/contexts/<locale>/<file>
-2. Project local (root):   <project>/.claude/queen-bee/contexts/<file>
+1. Project local (locale): <project>/.claude/beeops/contexts/<locale>/<file>
+2. Project local (root):   <project>/.claude/beeops/contexts/<file>
 3. Package (locale):        <pkg>/contexts/<locale>/<file>
 4. Package (root):          <pkg>/contexts/<file>
 ```
@@ -35,15 +35,15 @@ prompt-context.py resolves context files in the following order:
 - Local files take priority when present
 - Falls back to package defaults for missing local files
 - `agent-modes.json` follows the same fallback rules
-- Locale determined by QB_LOCALE env var or `.claude/queen-bee/locale` file
-- `npx queen-bee init --with-contexts` copies defaults locally for customization
+- Locale determined by BO_LOCALE env var or `.claude/beeops/locale` file
+- `npx beeops init --with-contexts` copies defaults locally for customization
 
 ## Directory Structure
 
 ```
-queen-bee/
+beeops/
 ├── package.json                         # npm package definition
-├── bin/queen-bee.js                     # CLI: init / update / check
+├── bin/beeops.js                     # CLI: init / update / check
 ├── scripts/
 │   ├── launch-leader.sh                 # Launch Leader/Review Leader in tmux window
 │   └── launch-worker.sh                 # Launch Worker in tmux pane
@@ -85,23 +85,23 @@ queen-bee/
 │   ├── fb.md                            # Self-improvement agent context (root fallback)
 │   └── default.md                       # Default context (no mode active)
 ├── skills/
-│   ├── qb-dispatch/SKILL.md             # Queen → Leader dispatch procedure
-│   ├── qb-leader-dispatch/SKILL.md      # Leader → Worker dispatch procedure
-│   ├── qb-task-decomposer/SKILL.md    # Task decomposition skill
-│   ├── qb-issue-sync/SKILL.md         # GitHub Issue → queue.yaml sync
-│   ├── qb-log-writer/SKILL.md         # Structured work log recording
-│   ├── qb-self-improver/              # Self-improvement analysis
+│   ├── bo-dispatch/SKILL.md             # Queen → Leader dispatch procedure
+│   ├── bo-leader-dispatch/SKILL.md      # Leader → Worker dispatch procedure
+│   ├── bo-task-decomposer/SKILL.md    # Task decomposition skill
+│   ├── bo-issue-sync/SKILL.md         # GitHub Issue → queue.yaml sync
+│   ├── bo-log-writer/SKILL.md         # Structured work log recording
+│   ├── bo-self-improver/              # Self-improvement analysis
 │   │   ├── SKILL.md
 │   │   ├── scripts/analyze.py
 │   │   └── refs/                        # Reference docs for improvement
-│   ├── qb-review-backend/SKILL.md          # Backend code review
-│   ├── qb-review-frontend/SKILL.md         # Frontend code review
-│   ├── qb-review-database/SKILL.md         # Database/SQL review
-│   ├── qb-review-operations/SKILL.md       # Infrastructure/DevOps review
-│   ├── qb-review-process/SKILL.md          # Development process review
-│   └── qb-review-security/SKILL.md         # Security review (cross-cutting)
+│   ├── bo-review-backend/SKILL.md          # Backend code review
+│   ├── bo-review-frontend/SKILL.md         # Frontend code review
+│   ├── bo-review-database/SKILL.md         # Database/SQL review
+│   ├── bo-review-operations/SKILL.md       # Infrastructure/DevOps review
+│   ├── bo-review-process/SKILL.md          # Development process review
+│   └── bo-review-security/SKILL.md         # Security review (cross-cutting)
 └── command/
-    └── qb.md                            # /qb slash command definition
+    └── bo.md                            # /bo slash command definition
 ```
 
 ### Files Generated in Target Project
@@ -109,23 +109,23 @@ queen-bee/
 ```
 <project>/
 ├── .claude/
-│   ├── commands/qb.md                   # /qb command
+│   ├── commands/bo.md                   # /bo command
 │   ├── skills/
-│   │   ├── qb-dispatch/SKILL.md         # Queen skill
-│   │   ├── qb-leader-dispatch/SKILL.md  # Leader skill
-│   │   ├── qb-task-decomposer/SKILL.md
-│   │   ├── qb-issue-sync/SKILL.md
-│   │   ├── qb-log-writer/SKILL.md
-│   │   ├── qb-self-improver/          # With scripts/ and refs/
-│   │   ├── qb-review-backend/SKILL.md
-│   │   ├── qb-review-frontend/SKILL.md
-│   │   ├── qb-review-database/SKILL.md
-│   │   ├── qb-review-operations/SKILL.md
-│   │   ├── qb-review-process/SKILL.md
-│   │   └── qb-review-security/SKILL.md
+│   │   ├── bo-dispatch/SKILL.md         # Queen skill
+│   │   ├── bo-leader-dispatch/SKILL.md  # Leader skill
+│   │   ├── bo-task-decomposer/SKILL.md
+│   │   ├── bo-issue-sync/SKILL.md
+│   │   ├── bo-log-writer/SKILL.md
+│   │   ├── bo-self-improver/          # With scripts/ and refs/
+│   │   ├── bo-review-backend/SKILL.md
+│   │   ├── bo-review-frontend/SKILL.md
+│   │   ├── bo-review-database/SKILL.md
+│   │   ├── bo-review-operations/SKILL.md
+│   │   ├── bo-review-process/SKILL.md
+│   │   └── bo-review-security/SKILL.md
 │   ├── settings.local.json              # Hook registration (--local, default)
 │   ├── settings.json                    # Hook registration (--shared)
-│   └── queen-bee/
+│   └── beeops/
 │       ├── locale                       # Locale preference file
 │       └── contexts/                    # Custom contexts (--with-contexts only)
 │           ├── en/
@@ -133,15 +133,15 @@ queen-bee/
 │           └── ...
 ```
 
-## `npx queen-bee init` Behavior
+## `npx beeops init` Behavior
 
 1. Prerequisites check (Node.js>=18, git, tmux, python3, claude, gh)
 2. Detect project root via `git rev-parse --show-toplevel`
-3. Copy `.claude/commands/qb.md`
+3. Copy `.claude/commands/bo.md`
 4. Copy 12 skills to `.claude/skills/`
 5. Register 3 hooks: UserPromptSubmit, Stop, PostToolUse (default: `.claude/settings.local.json`)
-6. Save locale preference to `.claude/queen-bee/locale`
-7. If `--with-contexts`: copy defaults to `.claude/queen-bee/contexts/`
+6. Save locale preference to `.claude/beeops/locale`
+7. If `--with-contexts`: copy defaults to `.claude/beeops/contexts/`
 8. Display completion message
 
 ### init Options
@@ -158,20 +158,20 @@ queen-bee/
 
 | Variable | Set by | Used by | Purpose |
 |----------|--------|---------|---------|
-| QB_QUEEN | command/qb.md | prompt-context.py | Identifies Queen agent |
-| QB_LEADER | launch-leader.sh | prompt-context.py | Identifies Leader agent |
-| QB_REVIEW_LEADER | launch-leader.sh | prompt-context.py | Identifies Review Leader |
-| QB_WORKER_CODER | launch-worker.sh | prompt-context.py | Identifies coder Worker |
-| QB_WORKER_TESTER | launch-worker.sh | prompt-context.py | Identifies tester Worker |
-| QB_WORKER_CODE_REVIEWER | launch-worker.sh | prompt-context.py | Identifies code reviewer Worker |
-| QB_WORKER_SECURITY | launch-worker.sh | prompt-context.py | Identifies security reviewer Worker |
-| QB_WORKER_TEST_AUDITOR | launch-worker.sh | prompt-context.py | Identifies test auditor Worker |
-| QB_SCRIPTS_DIR | command/qb.md | launch-*.sh | Package scripts directory |
-| QB_CONTEXTS_DIR | command/qb.md | prompt-context.py | Package contexts directory |
-| QB_LOCALE | user | prompt-context.py | Override locale preference |
-| QB_LOG_DIR | user | resolve-log-path.py | Override log directory path |
-| QB_FB_AGENT | run-log.py | prompt-context.py, checkpoint.py | Identifies log/feedback agent (loop prevention) |
-| QB_FB_INCLUDE_FB | run-log.py | prompt-context.py | Includes self-improvement in feedback agent |
+| BO_QUEEN | command/bo.md | prompt-context.py | Identifies Queen agent |
+| BO_LEADER | launch-leader.sh | prompt-context.py | Identifies Leader agent |
+| BO_REVIEW_LEADER | launch-leader.sh | prompt-context.py | Identifies Review Leader |
+| BO_WORKER_CODER | launch-worker.sh | prompt-context.py | Identifies coder Worker |
+| BO_WORKER_TESTER | launch-worker.sh | prompt-context.py | Identifies tester Worker |
+| BO_WORKER_CODE_REVIEWER | launch-worker.sh | prompt-context.py | Identifies code reviewer Worker |
+| BO_WORKER_SECURITY | launch-worker.sh | prompt-context.py | Identifies security reviewer Worker |
+| BO_WORKER_TEST_AUDITOR | launch-worker.sh | prompt-context.py | Identifies test auditor Worker |
+| BO_SCRIPTS_DIR | command/bo.md | launch-*.sh | Package scripts directory |
+| BO_CONTEXTS_DIR | command/bo.md | prompt-context.py | Package contexts directory |
+| BO_LOCALE | user | prompt-context.py | Override locale preference |
+| BO_LOG_DIR | user | resolve-log-path.py | Override log directory path |
+| BO_FB_AGENT | run-log.py | prompt-context.py, checkpoint.py | Identifies log/feedback agent (loop prevention) |
+| BO_FB_INCLUDE_FB | run-log.py | prompt-context.py | Includes self-improvement in feedback agent |
 
 ## Development
 
@@ -181,23 +181,23 @@ queen-bee/
 cd /Users/yuugou/dev/oss/claude-ants
 npm link
 cd <test-project>
-npm link queen-bee
-npx queen-bee init
-npx queen-bee init --shared
-npx queen-bee init -g
-npx queen-bee init --with-contexts --locale ja
-npx queen-bee check
-# In Claude Code: /qb → Queen launches
+npm link beeops
+npx beeops init
+npx beeops init --shared
+npx beeops init -g
+npx beeops init --with-contexts --locale ja
+npx beeops check
+# In Claude Code: /bo → Queen launches
 ```
 
 ### Verification Points
 
-1. `.claude/commands/qb.md` is generated
+1. `.claude/commands/bo.md` is generated
 2. `.claude/skills/` contains all 12 skills
 3. 3 hooks registered in the specified settings file (UserPromptSubmit, Stop, PostToolUse)
-4. `/qb` launches Queen in tmux
-5. Queen can execute `$QB_SCRIPTS_DIR/launch-leader.sh`
-6. `QB_SCRIPTS_DIR`/`QB_CONTEXTS_DIR` propagate to Leader/Worker
+4. `/bo` launches Queen in tmux
+5. Queen can execute `$BO_SCRIPTS_DIR/launch-leader.sh`
+6. `BO_SCRIPTS_DIR`/`BO_CONTEXTS_DIR` propagate to Leader/Worker
 7. `prompt-context.py` resolves contexts with locale fallback
 8. Deleting a local file falls back to package default
 9. Stop hook triggers log recording on session exit

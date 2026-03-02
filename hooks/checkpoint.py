@@ -2,7 +2,7 @@
 """PostToolUse hook: Mid-session checkpoint logging trigger.
 
 Fires on every PostToolUse matching Edit/Write/Bash/Skill.
-Manages a counter in /tmp/qb-session-checkpoint.json and
+Manages a counter in /tmp/bo-session-checkpoint.json and
 outputs a log-recording instruction to stdout when thresholds are reached.
 
 Thresholds:
@@ -15,10 +15,10 @@ import os
 import sys
 import time
 
-STATE_FILE = "/tmp/qb-session-checkpoint.json"
+STATE_FILE = "/tmp/bo-session-checkpoint.json"
 
 # Loop prevention: skip if running inside the feedback/log agent
-if os.environ.get("QB_FB_AGENT"):
+if os.environ.get("BO_FB_AGENT"):
     sys.exit(0)
 
 # Read hook input from stdin
@@ -84,6 +84,6 @@ if should_checkpoint:
         pass
 
     print("""Mid-session checkpoint: Record work so far to log.jsonl.
-1. Invoke qb-log-writer skill via Skill tool
+1. Invoke bo-log-writer skill via Skill tool
 2. Record recent changes, decisions, and error resolutions in 1-2 entries
 3. After recording, resume the original task""")

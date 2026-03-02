@@ -5,12 +5,12 @@ Reads agent-modes.json to determine the active mode, then outputs the
 corresponding context file content.
 
 Context resolution order (4-step fallback):
-  1. Project local (locale): <project>/.claude/queen-bee/contexts/<locale>/<file>
-  2. Project local (root):   <project>/.claude/queen-bee/contexts/<file>
+  1. Project local (locale): <project>/.claude/beeops/contexts/<locale>/<file>
+  2. Project local (root):   <project>/.claude/beeops/contexts/<file>
   3. Package (locale):        <pkg>/contexts/<locale>/<file>
   4. Package (root):          <pkg>/contexts/<file>
 
-Locale is determined by QB_LOCALE env var (default: "en").
+Locale is determined by BO_LOCALE env var (default: "en").
 """
 
 import json
@@ -41,12 +41,12 @@ def get_project_root() -> Optional[Path]:
 
 
 def get_locale(root: Optional[Path]) -> str:
-    """Get locale from QB_LOCALE env var or .claude/queen-bee/locale file."""
-    env_locale = os.environ.get("QB_LOCALE")
+    """Get locale from BO_LOCALE env var or .claude/beeops/locale file."""
+    env_locale = os.environ.get("BO_LOCALE")
     if env_locale:
         return env_locale
     if root:
-        locale_file = root / ".claude" / "queen-bee" / "locale"
+        locale_file = root / ".claude" / "beeops" / "locale"
         if locale_file.is_file():
             return locale_file.read_text().strip() or DEFAULT_LOCALE
     return DEFAULT_LOCALE
@@ -56,7 +56,7 @@ def get_local_context_dir(root: Optional[Path]) -> Optional[Path]:
     """Return project-local contexts directory if it exists."""
     if root is None:
         return None
-    local_dir = root / ".claude" / "queen-bee" / "contexts"
+    local_dir = root / ".claude" / "beeops" / "contexts"
     return local_dir if local_dir.is_dir() else None
 
 

@@ -1,6 +1,6 @@
 ---
-name: qb-review-backend
-description: Triggered for backend code and API design reviews, INCLUDING after bugfixes and implementation changes. [Required pair: qb-review-security] Auto-trigger after any implementation/bugfix to server-side code (.ts/.js/.py etc., including CLI scripts like bin/*.js), API design docs (doc/design/api), domain models. Use qb-review-frontend for frontend, qb-review-database for DB.
+name: bo-review-backend
+description: Triggered for backend code and API design reviews, INCLUDING after bugfixes and implementation changes. [Required pair: bo-review-security] Auto-trigger after any implementation/bugfix to server-side code (.ts/.js/.py etc., including CLI scripts like bin/*.js), API design docs (doc/design/api), domain models. Use bo-review-frontend for frontend, bo-review-database for DB.
 ---
 
 ## Usage Contract
@@ -8,7 +8,7 @@ description: Triggered for backend code and API design reviews, INCLUDING after 
 When using this skill, always include the following at the beginning of your output:
 
 ```
-[SKILL_USED: qb-review-backend]
+[SKILL_USED: bo-review-backend]
 ```
 
 ---
@@ -184,6 +184,13 @@ function processOrder(userId: UserId, amount: Money) {}
 - [ ] Can tests be read as specifications?
 - [ ] Are tests tightly coupled to implementation details?
 - [ ] Is coverage of critical paths prioritized over raw coverage numbers?
+
+### Cross-Platform Compatibility (Node.js CLI / package.json scripts)
+
+- [ ] Does `package.json` `test` script use a glob pattern? If so, verify it works on **Linux CI** (not just macOS/zsh).
+  - `node --test 'test/**/*.test.js'` fails on Linux because the shell does not expand single-quoted globs
+  - Fix: pass a literal path (`node --test test/cli.test.js`) or use a glob library (`glob` npm package or `--test-reporter` options)
+  - Root cause: macOS/zsh expands globs before passing to node, Linux/sh does not
 
 ---
 

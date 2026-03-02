@@ -1,9 +1,9 @@
 ---
-name: qb-leader-dispatch
+name: bo-leader-dispatch
 description: Launch Workers in tmux panes, wait for completion, and evaluate quality. Shared dispatch skill for Leader and Review Leader.
 ---
 
-# qb-leader-dispatch: Worker launch + completion wait + quality evaluation
+# bo-leader-dispatch: Worker launch + completion wait + quality evaluation
 
 Operational skill for Leaders and Review Leaders to delegate subtasks to Workers.
 Provides Worker visualization via tmux split-pane, event-driven completion waiting, and retry determination based on quality evaluation.
@@ -21,7 +21,7 @@ If the prompt file does not exist, `launch-worker.sh` will exit with an error.
 ### Basic syntax
 
 ```bash
-bash $QB_SCRIPTS_DIR/launch-worker.sh {role} {issue} {subtask_id} {branch}
+bash $BO_SCRIPTS_DIR/launch-worker.sh {role} {issue} {subtask_id} {branch}
 ```
 
 ### Available roles
@@ -30,7 +30,7 @@ bash $QB_SCRIPTS_DIR/launch-worker.sh {role} {issue} {subtask_id} {branch}
 |------|---------|-------------|
 | worker-coder | Code implementation | Leader |
 | worker-tester | Test creation | Leader |
-| worker-reviewer | Code review | Review Leader |
+| worker-code-reviewer | Code review | Review Leader |
 | worker-security | Security review | Review Leader |
 | worker-test-auditor | Test audit | Review Leader |
 
@@ -38,16 +38,16 @@ bash $QB_SCRIPTS_DIR/launch-worker.sh {role} {issue} {subtask_id} {branch}
 
 ```bash
 # Launch 2 implementation Workers in parallel
-bash $QB_SCRIPTS_DIR/launch-worker.sh worker-coder 42 impl-1 feat/issue-42
-bash $QB_SCRIPTS_DIR/launch-worker.sh worker-coder 42 impl-2 feat/issue-42
+bash $BO_SCRIPTS_DIR/launch-worker.sh worker-coder 42 impl-1 feat/issue-42
+bash $BO_SCRIPTS_DIR/launch-worker.sh worker-coder 42 impl-2 feat/issue-42
 
 # Test Worker
-bash $QB_SCRIPTS_DIR/launch-worker.sh worker-tester 42 test-1 feat/issue-42
+bash $BO_SCRIPTS_DIR/launch-worker.sh worker-tester 42 test-1 feat/issue-42
 
 # Launch Review Workers in parallel
-bash $QB_SCRIPTS_DIR/launch-worker.sh worker-reviewer 42 review-code feat/issue-42
-bash $QB_SCRIPTS_DIR/launch-worker.sh worker-security 42 review-sec feat/issue-42
-bash $QB_SCRIPTS_DIR/launch-worker.sh worker-test-auditor 42 review-test feat/issue-42
+bash $BO_SCRIPTS_DIR/launch-worker.sh worker-code-reviewer 42 review-code feat/issue-42
+bash $BO_SCRIPTS_DIR/launch-worker.sh worker-security 42 review-sec feat/issue-42
+bash $BO_SCRIPTS_DIR/launch-worker.sh worker-test-auditor 42 review-test feat/issue-42
 ```
 
 `launch-worker.sh` automatically performs the following:
@@ -86,7 +86,7 @@ Check `.claude/tasks/reports/`:
 ### State check on timeout
 
 ```bash
-tmux list-panes -t qb:{window_name} -F '#{@agent_label} #{pane_current_command}' 2>/dev/null
+tmux list-panes -t bo:{window_name} -F '#{@agent_label} #{pane_current_command}' 2>/dev/null
 ```
 
 | State | Meaning | Action |
@@ -161,8 +161,8 @@ Launch subtasks that do not depend on each other simultaneously:
 # Write worker-42-impl-ui.md
 
 # Launch in parallel
-bash $QB_SCRIPTS_DIR/launch-worker.sh worker-coder 42 impl-api feat/issue-42
-bash $QB_SCRIPTS_DIR/launch-worker.sh worker-coder 42 impl-ui feat/issue-42
+bash $BO_SCRIPTS_DIR/launch-worker.sh worker-coder 42 impl-api feat/issue-42
+bash $BO_SCRIPTS_DIR/launch-worker.sh worker-coder 42 impl-ui feat/issue-42
 
 # Wait for 2 Workers
 EXPECTED=2
@@ -184,15 +184,15 @@ When a subtask depends on the output of a previous one:
 
 ```bash
 # Phase 1: Implementation
-bash $QB_SCRIPTS_DIR/launch-worker.sh worker-coder 42 impl-1 feat/issue-42
+bash $BO_SCRIPTS_DIR/launch-worker.sh worker-coder 42 impl-1 feat/issue-42
 # Wait + quality evaluation
 
 # Phase 2: Tests (after implementation)
-bash $QB_SCRIPTS_DIR/launch-worker.sh worker-tester 42 test-1 feat/issue-42
+bash $BO_SCRIPTS_DIR/launch-worker.sh worker-tester 42 test-1 feat/issue-42
 # Wait + quality evaluation
 
 # Phase 3: PR creation (after all complete)
-bash $QB_SCRIPTS_DIR/launch-worker.sh worker-coder 42 pr feat/issue-42
+bash $BO_SCRIPTS_DIR/launch-worker.sh worker-coder 42 pr feat/issue-42
 # Wait + quality evaluation
 ```
 
