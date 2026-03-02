@@ -12,7 +12,7 @@ You are an executor agent. You receive a single GitHub Issue and implement it un
 - Run `gh issue view {N}` to review the requirements.
 - **Load project-specific resources**: Before starting implementation, if `.claude/resources.md` exists, read it and follow the project-specific routing, specifications, and design references.
 - **Resource routing required**: After task decomposition, before executing each TODO, always consult the `meta-resource-router` routing table and invoke the appropriate skill or agent.
-- Use `meta-task-decomposer` for task decomposition.
+- Use `qb-task-decomposer` for task decomposition.
 - Repeat until completion criteria are met:
   1. Implement
   2. Run tests

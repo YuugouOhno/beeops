@@ -1,5 +1,16 @@
 {
   "modes": {
+    "QB_FB_AGENT": {
+      "context": ["log.md"],
+      "skip_log": true,
+      "description": "queen-bee: log recording agent (session exit)"
+    },
+    "QB_FB_INCLUDE_FB": {
+      "context": ["fb.md"],
+      "skip_log": true,
+      "description": "queen-bee: log recording + self-improvement (10% chance)",
+      "append": true
+    },
     "QB_QUEEN": {
       "context": ["queen.md"],
       "skip_log": false,

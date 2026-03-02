@@ -1,9 +1,9 @@
 ---
-name: orch-issue-sync
+name: qb-issue-sync
 description: Sync GitHub Issues to queue.yaml. Detects new issues, analyzes dependencies, assigns priorities, and performs diff-merge.
 ---
 
-# orch-issue-sync: Issue → queue.yaml Sync
+# qb-issue-sync: Issue → queue.yaml Sync
 
 Fetches open Issues from GitHub and syncs them to `.claude/tasks/queue.yaml`.
 Handles adding new Issues, marking closed Issues as done, dependency analysis, and priority assignment in one operation.

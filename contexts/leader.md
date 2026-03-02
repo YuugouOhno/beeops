@@ -11,7 +11,7 @@ You are responsible for completing the implementation of an Issue. Launch Worker
 ### Permitted Operations
 - `gh issue view` to check Issue details
 - `gh pr diff` to review diffs (during quality evaluation)
-- Skill: `meta-task-decomposer` for subtask decomposition
+- Skill: `qb-task-decomposer` for subtask decomposition
 - Skill: `qb-leader-dispatch` to launch Workers, wait for completion, and evaluate quality
 - Read / Write report files (your own summaries only)
 - `tmux wait-for -S queen-wake` to send signal
@@ -27,7 +27,7 @@ Start (receive prompt file from Queen)
   |
   v
 2. Decompose into subtasks
-  Skill: meta-task-decomposer
+  Skill: qb-task-decomposer
   |
   v
 3. Dispatch Workers in parallel

@@ -108,7 +108,7 @@ You are responsible for completing the implementation of GitHub Issue #${ISSUE}.
 
 ## Procedure
 1. Review the issue: gh issue view ${ISSUE} --json body,title,labels
-2. Skill: meta-task-decomposer to decompose into subtasks
+2. Skill: qb-task-decomposer to decompose into subtasks
 3. Skill: qb-leader-dispatch to launch Workers in parallel
 4. Evaluate Worker reports for quality (re-run up to 2 times if unsatisfactory)
 5. After all subtasks are complete, perform a self-critical review (read the PR diff and verify alignment with Issue requirements)

@@ -48,7 +48,10 @@ queen-bee/
 │   ├── launch-leader.sh                 # Launch Leader/Review Leader in tmux window
 │   └── launch-worker.sh                 # Launch Worker in tmux pane
 ├── hooks/
-│   └── prompt-context.py                # UserPromptSubmit hook (env var → context injection)
+│   ├── prompt-context.py                # UserPromptSubmit hook (env var → context injection)
+│   ├── run-log.py                       # Stop hook (session-end log recording)
+│   ├── checkpoint.py                    # PostToolUse hook (mid-session checkpoint)
+│   └── resolve-log-path.py             # Log directory path resolver utility
 ├── contexts/                            # Package default contexts
 │   ├── en/                              # English locale
 │   │   ├── queen.md
@@ -56,6 +59,9 @@ queen-bee/
 │   │   ├── review-leader.md
 │   │   ├── executor.md
 │   │   ├── reviewer-base.md
+│   │   ├── code-reviewer.md
+│   │   ├── log.md                       # Log recording agent context
+│   │   ├── fb.md                        # Self-improvement agent context
 │   │   └── agent-modes.json
 │   ├── ja/                              # Japanese locale
 │   │   └── ...
@@ -65,12 +71,25 @@ queen-bee/
 │   ├── agent-modes.json                 # Env var → context file mapping
 │   ├── executor.md                      # Worker (coder/tester) context
 │   ├── reviewer-base.md                 # Worker (reviewer) context
+│   ├── log.md                           # Log recording agent context (root fallback)
+│   ├── fb.md                            # Self-improvement agent context (root fallback)
 │   └── default.md                       # Default context (no mode active)
 ├── skills/
 │   ├── qb-dispatch/SKILL.md             # Queen → Leader dispatch procedure
 │   ├── qb-leader-dispatch/SKILL.md      # Leader → Worker dispatch procedure
-│   ├── meta-task-decomposer/SKILL.md    # Task decomposition skill
-│   └── orch-issue-sync/SKILL.md         # GitHub Issue → queue.yaml sync
+│   ├── qb-task-decomposer/SKILL.md    # Task decomposition skill
+│   ├── qb-issue-sync/SKILL.md         # GitHub Issue → queue.yaml sync
+│   ├── qb-log-writer/SKILL.md         # Structured work log recording
+│   ├── qb-self-improver/              # Self-improvement analysis
+│   │   ├── SKILL.md
+│   │   ├── scripts/analyze.py
+│   │   └── refs/                        # Reference docs for improvement
+│   ├── qb-review-backend/SKILL.md          # Backend code review
+│   ├── qb-review-frontend/SKILL.md         # Frontend code review
+│   ├── qb-review-database/SKILL.md         # Database/SQL review
+│   ├── qb-review-operations/SKILL.md       # Infrastructure/DevOps review
+│   ├── qb-review-process/SKILL.md          # Development process review
+│   └── qb-review-security/SKILL.md         # Security review (cross-cutting)
 └── command/
     └── qb.md                            # /qb slash command definition
 ```
@@ -84,8 +103,16 @@ queen-bee/
 │   ├── skills/
 │   │   ├── qb-dispatch/SKILL.md         # Queen skill
 │   │   ├── qb-leader-dispatch/SKILL.md  # Leader skill
-│   │   ├── meta-task-decomposer/SKILL.md
-│   │   └── orch-issue-sync/SKILL.md
+│   │   ├── qb-task-decomposer/SKILL.md
+│   │   ├── qb-issue-sync/SKILL.md
+│   │   ├── qb-log-writer/SKILL.md
+│   │   ├── qb-self-improver/          # With scripts/ and refs/
+│   │   ├── qb-review-backend/SKILL.md
+│   │   ├── qb-review-frontend/SKILL.md
+│   │   ├── qb-review-database/SKILL.md
+│   │   ├── qb-review-operations/SKILL.md
+│   │   ├── qb-review-process/SKILL.md
+│   │   └── qb-review-security/SKILL.md
 │   ├── settings.local.json              # Hook registration (--local, default)
 │   ├── settings.json                    # Hook registration (--shared)
 │   └── queen-bee/
@@ -101,8 +128,8 @@ queen-bee/
 1. Prerequisites check (Node.js>=18, git, tmux, python3, claude, gh)
 2. Detect project root via `git rev-parse --show-toplevel`
 3. Copy `.claude/commands/qb.md`
-4. Copy skills to `.claude/skills/`
-5. Register hook (default: `.claude/settings.local.json`)
+4. Copy 12 skills to `.claude/skills/`
+5. Register 3 hooks: UserPromptSubmit, Stop, PostToolUse (default: `.claude/settings.local.json`)
 6. Save locale preference to `.claude/queen-bee/locale`
 7. If `--with-contexts`: copy defaults to `.claude/queen-bee/contexts/`
 8. Display completion message
@@ -132,6 +159,9 @@ queen-bee/
 | QB_SCRIPTS_DIR | command/qb.md | launch-*.sh | Package scripts directory |
 | QB_CONTEXTS_DIR | command/qb.md | prompt-context.py | Package contexts directory |
 | QB_LOCALE | user | prompt-context.py | Override locale preference |
+| QB_LOG_DIR | user | resolve-log-path.py | Override log directory path |
+| QB_FB_AGENT | run-log.py | prompt-context.py, checkpoint.py | Identifies log/feedback agent (loop prevention) |
+| QB_FB_INCLUDE_FB | run-log.py | prompt-context.py | Includes self-improvement in feedback agent |
 
 ## Development
 
@@ -153,10 +183,13 @@ npx queen-bee check
 ### Verification Points
 
 1. `.claude/commands/qb.md` is generated
-2. `.claude/skills/` contains all 4 skills
-3. Hook is registered in the specified settings file
+2. `.claude/skills/` contains all 12 skills
+3. 3 hooks registered in the specified settings file (UserPromptSubmit, Stop, PostToolUse)
 4. `/qb` launches Queen in tmux
 5. Queen can execute `$QB_SCRIPTS_DIR/launch-leader.sh`
 6. `QB_SCRIPTS_DIR`/`QB_CONTEXTS_DIR` propagate to Leader/Worker
 7. `prompt-context.py` resolves contexts with locale fallback
 8. Deleting a local file falls back to package default
+9. Stop hook triggers log recording on session exit
+10. PostToolUse hook triggers checkpoint after threshold edits
+11. Review skills are invoked by code-reviewer via resource routing

@@ -19,7 +19,7 @@
 - `gh pr checks` 等の情報取得コマンド
 - `tmux wait-for` による待機
 - レポートの `mv` (processed/ へ移動)
-- Skill ツールの発動 (qb-dispatch, orch-issue-sync)
+- Skill ツールの発動 (qb-dispatch, qb-issue-sync)
 
 ## 自律稼働ルール
 
@@ -41,7 +41,7 @@ Phase 0: 指示解析
   └─ 指示なし or "Issue を消化" → Phase 1 へ
   │
   ▼
-Phase 1: Skill「orch-issue-sync」を発動（Issue 系タスクがある場合のみ）
+Phase 1: Skill「qb-issue-sync」を発動（Issue 系タスクがある場合のみ）
   → GitHub Issues → queue.yaml 同期
   │
   ▼
@@ -75,7 +75,7 @@ Phase 2: イベント駆動ループ
 
 ### タスク分解の手順
 
-1. **Skill: `meta-task-decomposer`** を発動し、指示をタスクに分解する
+1. **Skill: `qb-task-decomposer`** を発動し、指示をタスクに分解する
 2. 分解結果を queue.yaml のタスクとして追加（以下の形式）:
 
 ```yaml
@@ -110,7 +110,7 @@ Phase 2: イベント駆動ループ
 
 1. `cat $QB_CONTEXTS_DIR/agent-modes.json` を Bash で実行して読み込む（roles セクションを使用）
 2. **Phase 0**: 受け取った指示を解析。具体的指示があればタスク分解して queue.yaml に追加
-3. Issue 同期が必要な場合: **Skill: `orch-issue-sync`** を発動 → queue.yaml に issue タスク追加
+3. Issue 同期が必要な場合: **Skill: `qb-issue-sync`** を発動 → queue.yaml に issue タスク追加
 4. Phase 2 のイベント駆動ループに入る
 
 ## ツール呼び出しルール

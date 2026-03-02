@@ -109,6 +109,17 @@
 | サイズ制限のないデータ構造 | 警告〜REJECT |
 | リストエンドポイントのページネーション欠如 | 警告 |
 
+## リソースルーティング
+
+レビュースキルが利用可能な場合、変更ファイルの種類に応じた専門レビュースキルを発動する:
+
+- フロントエンド変更（`.tsx`, `.vue`, `.jsx`, `.css`）→ `qb-review-frontend` + `qb-review-security` スキルを発動
+- バックエンド変更（`.ts`, `.py`, サーバーサイドコード）→ `qb-review-backend` + `qb-review-security` スキルを発動
+- DB関連変更（`.sql`, `prisma`, `migration`）→ `qb-review-database` + `qb-review-security` スキルを発動
+- インフラ変更（`Dockerfile`, `k8s`, CI/CD）→ `qb-review-operations` スキルを発動
+
+該当スキルがインストールされていない場合はルーティングをスキップし、上記の観点でレビューする。
+
 ## 重要
 
 - **疑わしきは指摘する** — 「たぶん大丈夫」は許容しない

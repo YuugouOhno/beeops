@@ -9,7 +9,10 @@ const PKG_DIR = path.resolve(__dirname, "..");
 const COMMAND_SRC = path.join(PKG_DIR, "command", "qb.md");
 const SKILLS_SRC = path.join(PKG_DIR, "skills");
 const CONTEXTS_SRC = path.join(PKG_DIR, "contexts");
-const HOOK_SRC = path.join(PKG_DIR, "hooks", "prompt-context.py");
+const HOOKS_DIR = path.join(PKG_DIR, "hooks");
+const HOOK_SRC = path.join(HOOKS_DIR, "prompt-context.py");
+const HOOK_STOP_SRC = path.join(HOOKS_DIR, "run-log.py");
+const HOOK_POST_SRC = path.join(HOOKS_DIR, "checkpoint.py");
 const HOME_DIR = process.env.HOME || process.env.USERPROFILE;
 
 // ── Helpers ──
@@ -139,6 +142,30 @@ function settingsModeLabel(mode) {
   }
 }
 
+function upsertHook(hooks, hookType, matchStr, command, matcher) {
+  if (!hooks[hookType]) hooks[hookType] = [];
+
+  const existingIdx = hooks[hookType].findIndex((entry) => {
+    // Check new format
+    if (entry.hooks) {
+      return entry.hooks.some((h) => h.command && h.command.includes(matchStr));
+    }
+    // Check old format (for migration)
+    return entry.type === "command" && entry.command && entry.command.includes(matchStr);
+  });
+
+  const hookEntry = { hooks: [{ type: "command", command }] };
+  if (matcher) hookEntry.matcher = matcher;
+
+  if (existingIdx >= 0) {
+    hooks[hookType][existingIdx] = hookEntry;
+    return "updated";
+  } else {
+    hooks[hookType].push(hookEntry);
+    return "added";
+  }
+}
+
 function updateSettingsHook(root, mode) {
   const settingsFile = resolveSettingsFile(root, mode);
   ensureDir(path.dirname(settingsFile));
@@ -154,26 +181,20 @@ function updateSettingsHook(root, mode) {
   }
 
   if (!settings.hooks) settings.hooks = {};
-  if (!settings.hooks.UserPromptSubmit) settings.hooks.UserPromptSubmit = [];
-
-  const hookCommand = `python3 ${HOOK_SRC}`;
-  const existingIdx = settings.hooks.UserPromptSubmit.findIndex(
-    (h) => h.type === "command" && h.command && h.command.includes("prompt-context.py")
-  );
-
-  const hookEntry = {
-    type: "command",
-    command: hookCommand,
-  };
 
   const label = settingsModeLabel(mode);
-  if (existingIdx >= 0) {
-    settings.hooks.UserPromptSubmit[existingIdx] = hookEntry;
-    console.log(`  updated: ${label} (hook updated)`);
-  } else {
-    settings.hooks.UserPromptSubmit.push(hookEntry);
-    console.log(`  added: ${label} (hook registered)`);
-  }
+
+  // UserPromptSubmit: prompt-context.py
+  const r1 = upsertHook(settings.hooks, "UserPromptSubmit", "prompt-context.py", `python3 ${HOOK_SRC}`);
+  console.log(`  ${r1}: ${label} (UserPromptSubmit hook)`);
+
+  // Stop: run-log.py
+  const r2 = upsertHook(settings.hooks, "Stop", "run-log.py", `python3 ${HOOK_STOP_SRC}`);
+  console.log(`  ${r2}: ${label} (Stop hook)`);
+
+  // PostToolUse: checkpoint.py
+  const r3 = upsertHook(settings.hooks, "PostToolUse", "checkpoint.py", `python3 ${HOOK_POST_SRC}`);
+  console.log(`  ${r3}: ${label} (PostToolUse hook)`);
 
   fs.writeFileSync(settingsFile, JSON.stringify(settings, null, 2) + "\n");
 }
@@ -201,16 +222,53 @@ function init(opts) {
     path.join(claudeDir, "skills", "qb-leader-dispatch")
   );
   copyDir(
-    path.join(SKILLS_SRC, "meta-task-decomposer"),
-    path.join(claudeDir, "skills", "meta-task-decomposer")
+    path.join(SKILLS_SRC, "qb-task-decomposer"),
+    path.join(claudeDir, "skills", "qb-task-decomposer")
   );
   copyDir(
-    path.join(SKILLS_SRC, "orch-issue-sync"),
-    path.join(claudeDir, "skills", "orch-issue-sync")
+    path.join(SKILLS_SRC, "qb-issue-sync"),
+    path.join(claudeDir, "skills", "qb-issue-sync")
+  );
+  copyDir(
+    path.join(SKILLS_SRC, "qb-log-writer"),
+    path.join(claudeDir, "skills", "qb-log-writer")
+  );
+  copyDir(
+    path.join(SKILLS_SRC, "qb-self-improver"),
+    path.join(claudeDir, "skills", "qb-self-improver")
+  );
+  copyDir(
+    path.join(SKILLS_SRC, "qb-review-backend"),
+    path.join(claudeDir, "skills", "qb-review-backend")
+  );
+  copyDir(
+    path.join(SKILLS_SRC, "qb-review-frontend"),
+    path.join(claudeDir, "skills", "qb-review-frontend")
+  );
+  copyDir(
+    path.join(SKILLS_SRC, "qb-review-database"),
+    path.join(claudeDir, "skills", "qb-review-database")
+  );
+  copyDir(
+    path.join(SKILLS_SRC, "qb-review-operations"),
+    path.join(claudeDir, "skills", "qb-review-operations")
+  );
+  copyDir(
+    path.join(SKILLS_SRC, "qb-review-process"),
+    path.join(claudeDir, "skills", "qb-review-process")
+  );
+  copyDir(
+    path.join(SKILLS_SRC, "qb-review-security"),
+    path.join(claudeDir, "skills", "qb-review-security")
   );
 
   // 3. Clean up old names if exists
-  for (const old of ["leader-dispatch", "ants-leader-dispatch", "ants-dispatch"]) {
+  for (const old of [
+    "leader-dispatch", "ants-leader-dispatch", "ants-dispatch",
+    "meta-task-decomposer", "orch-issue-sync", "meta-log-writer", "meta-self-improver",
+    "review-backend", "review-frontend", "review-database",
+    "review-operations", "review-process", "review-security",
+  ]) {
     const oldDir = path.join(claudeDir, "skills", old);
     if (fs.existsSync(oldDir)) {
       fs.rmSync(oldDir, { recursive: true });
@@ -224,7 +282,7 @@ function init(opts) {
     console.log("  removed: .claude/commands/ants.md (migrated to qb.md)");
   }
 
-  // 4. Register hook
+  // 4. Register hooks (UserPromptSubmit + Stop + PostToolUse)
   updateSettingsHook(root, opts.hookMode);
 
   // 5. Save locale preference
@@ -248,14 +306,19 @@ function init(opts) {
 
 // ── check ──
 
-function findHookInSettings(settingsFile) {
+function findHookInSettings(settingsFile, hookType, matchStr) {
   if (!fs.existsSync(settingsFile)) return null;
   try {
     const settings = JSON.parse(fs.readFileSync(settingsFile, "utf8"));
-    const hooks = settings.hooks?.UserPromptSubmit || [];
-    const found = hooks.find(
-      (h) => h.command && h.command.includes("prompt-context.py")
-    );
+    const entries = settings.hooks?.[hookType] || [];
+    const found = entries.find((entry) => {
+      // New format: { matcher, hooks: [{ type, command }] }
+      if (entry.hooks) {
+        return entry.hooks.some((h) => h.command && h.command.includes(matchStr));
+      }
+      // Old format: { type, command }
+      return entry.command && entry.command.includes(matchStr);
+    });
     return found || null;
   } catch {
     return null;
@@ -279,7 +342,13 @@ function check() {
   }
 
   // Check skills
-  for (const skill of ["qb-dispatch", "qb-leader-dispatch", "meta-task-decomposer", "orch-issue-sync"]) {
+  const CORE_SKILLS = [
+    "qb-dispatch", "qb-leader-dispatch", "qb-task-decomposer", "qb-issue-sync",
+    "qb-log-writer", "qb-self-improver",
+    "qb-review-backend", "qb-review-frontend", "qb-review-database",
+    "qb-review-operations", "qb-review-process", "qb-review-security",
+  ];
+  for (const skill of CORE_SKILLS) {
     const skillPath = path.join(claudeDir, "skills", skill, "SKILL.md");
     if (fs.existsSync(skillPath)) {
       console.log(`  [ok] .claude/skills/${skill}/SKILL.md`);
@@ -296,18 +365,30 @@ function check() {
     { file: path.join(HOME_DIR, ".claude", "settings.json"), label: "~/.claude/settings.json" },
   ];
 
-  let hookFound = false;
-  for (const { file, label } of settingsLocations) {
-    const hook = findHookInSettings(file);
-    if (hook) {
-      console.log(`  [ok] ${label} (hook registered)`);
-      hookFound = true;
-      break;
+  const HOOK_CHECKS = [
+    { hookType: "UserPromptSubmit", matchStr: "prompt-context.py", label: "UserPromptSubmit" },
+    { hookType: "Stop", matchStr: "run-log.py", label: "Stop" },
+    { hookType: "PostToolUse", matchStr: "checkpoint.py", label: "PostToolUse" },
+  ];
+
+  for (const { hookType, matchStr, label: hookLabel } of HOOK_CHECKS) {
+    let hookFound = false;
+    for (const { file, label } of settingsLocations) {
+      const hook = findHookInSettings(file, hookType, matchStr);
+      if (hook) {
+        console.log(`  [ok] ${label} (${hookLabel} hook)`);
+        hookFound = true;
+        break;
+      }
     }
-  }
-  if (!hookFound) {
-    console.log("  [missing] hook not found in any settings file");
-    ok = false;
+    if (!hookFound) {
+      if (hookType === "UserPromptSubmit") {
+        console.log(`  [missing] ${hookLabel} hook not found`);
+        ok = false;
+      } else {
+        console.log(`  [warn] ${hookLabel} hook not found (optional)`);
+      }
+    }
   }
 
   // Check local contexts (informational)

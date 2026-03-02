@@ -1,5 +1,7 @@
 # queen-bee
 
+[日本語版 README はこちら](README.ja.md)
+
 3-layer multi-agent orchestration system for [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
 **Queen → Leader → Worker** — automatically decomposes GitHub Issues into subtasks, implements them in parallel using git worktree isolation, runs code reviews, and checks CI — all orchestrated through tmux.

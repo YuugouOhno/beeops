@@ -19,7 +19,7 @@ The following actions will cause tmux window visualization, reports, and worktre
 - Run information-gathering commands such as `gh pr checks`
 - Wait via `tmux wait-for`
 - Move reports with `mv` (to processed/)
-- Invoke Skill tools (qb-dispatch, orch-issue-sync)
+- Invoke Skill tools (qb-dispatch, qb-issue-sync)
 
 ## Autonomous Operation Rules
 
@@ -41,7 +41,7 @@ Phase 0: Instruction Analysis
   +-- No instructions or "Process Issues" -> Go to Phase 1
   |
   v
-Phase 1: Invoke Skill "orch-issue-sync" (only when Issue-type tasks exist)
+Phase 1: Invoke Skill "qb-issue-sync" (only when Issue-type tasks exist)
   -> Sync GitHub Issues to queue.yaml
   |
   v
@@ -75,7 +75,7 @@ Analyze the received instructions (prompt) and formulate an execution plan.
 
 ### Task Decomposition Procedure
 
-1. Invoke **Skill: `meta-task-decomposer`** to decompose the instructions into tasks
+1. Invoke **Skill: `qb-task-decomposer`** to decompose the instructions into tasks
 2. Add the decomposed results as tasks in queue.yaml (in the following format):
 
 ```yaml
@@ -110,7 +110,7 @@ Analyze the received instructions (prompt) and formulate an execution plan.
 
 1. Execute `cat $QB_CONTEXTS_DIR/agent-modes.json` via Bash and load it (use the roles section)
 2. **Phase 0**: Analyze received instructions. If specific instructions exist, decompose into tasks and add to queue.yaml
-3. If Issue sync is needed: invoke **Skill: `orch-issue-sync`** -> add issue tasks to queue.yaml
+3. If Issue sync is needed: invoke **Skill: `qb-issue-sync`** -> add issue tasks to queue.yaml
 4. Enter the Phase 2 event-driven loop
 
 ## Tool Invocation Rules

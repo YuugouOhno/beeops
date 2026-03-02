@@ -1,5 +1,16 @@
 {
   "modes": {
+    "QB_FB_AGENT": {
+      "context": ["log.md"],
+      "skip_log": true,
+      "description": "queen-bee: ログ記録エージェント（セッション終了時）"
+    },
+    "QB_FB_INCLUDE_FB": {
+      "context": ["fb.md"],
+      "skip_log": true,
+      "description": "queen-bee: ログ記録 + 自己改善（10%確率で追加）",
+      "append": true
+    },
     "QB_QUEEN": {
       "context": ["queen.md"],
       "skip_log": false,
