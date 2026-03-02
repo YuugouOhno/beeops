@@ -253,11 +253,40 @@ mv .claude/tasks/reports/review-leader-{N}*.yaml .claude/tasks/reports/processed
 mv .claude/tasks/reports/worker-{N}-*.yaml .claude/tasks/reports/processed/ 2>/dev/null
 ```
 
-## Window cleanup
+## Cleanup after task completion
 
-After task completion (done, stuck, or error), remove unnecessary tmux windows:
+After task completion (done, stuck, or error), clean up **all** resources: tmux windows, git worktrees, and adhoc branches.
+
+### 1. Kill tmux windows
 
 ```bash
 tmux kill-window -t qb:issue-{N} 2>/dev/null || true
 tmux kill-window -t qb:review-{N} 2>/dev/null || true
 ```
+
+### 2. Remove git worktrees
+
+```bash
+REPO_DIR=$(git rev-parse --show-toplevel)
+WORKTREE_PATH="$REPO_DIR/.claude/worktrees/{branch}"
+
+if [ -d "$WORKTREE_PATH" ]; then
+  git -C "$REPO_DIR" worktree remove --force "$WORKTREE_PATH" 2>/dev/null || true
+fi
+```
+
+### 3. Delete adhoc branches (after merge)
+
+For branches that have been merged to main or are no longer needed:
+
+```bash
+git branch -D {branch} 2>/dev/null || true
+```
+
+### 4. Prune stale worktree references
+
+```bash
+git worktree prune
+```
+
+**Important**: Always run cleanup in this order (windows → worktrees → branches → prune). Deleting a branch before removing its worktree will cause errors.

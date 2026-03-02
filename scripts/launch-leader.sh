@@ -260,9 +260,9 @@ tmux wait-for -S queen-wake 2>/dev/null || true
 # Cleanup worktree if leader (after signal)
 if [ -n "\$WORKTREE_PATH" ] && [ -d "\$WORKTREE_PATH" ]; then
   cd "\$REPO_DIR"
-  if git -C "\$WORKTREE_PATH" diff --quiet 2>/dev/null && git -C "\$WORKTREE_PATH" diff --cached --quiet 2>/dev/null; then
-    timeout 30 git worktree remove --force "\$WORKTREE_PATH" 2>/dev/null || true
-  fi
+  # Always remove worktree after completion (changes should be committed)
+  timeout 30 git worktree remove --force "\$WORKTREE_PATH" 2>/dev/null || true
+  git worktree prune 2>/dev/null || true
 fi
 
 echo "--- \$ROLE completed (exit=\$EXIT_CODE) ---"
