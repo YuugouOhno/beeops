@@ -32,6 +32,10 @@
     "queen-bee",
     "claude-code"
   ],
+  "scripts": {
+    "test": "node --test 'test/**/*.test.js'",
+    "prepublishOnly": "npm test"
+  },
   "engines": {
     "node": ">=18"
   }
