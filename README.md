@@ -7,17 +7,27 @@
 ## How It Works
 
 ```
-Queen (L1)          – Reads GitHub Issues, builds queue.yaml, dispatches Leaders
-  └─ Leader (L2)    – Decomposes issue into subtasks, dispatches Workers, creates PR
-       └─ Worker (L3) – Executes a single subtask (code, test, review, security audit)
+Queen (L1)                – Reads GitHub Issues, builds queue.yaml, dispatches Leaders
+  ├─ Leader (L2)          – Decomposes issue into subtasks, dispatches Workers, creates PR
+  │    ├─ Worker (coder)  – Implements a single subtask
+  │    └─ Worker (tester) – Writes tests for a subtask
+  └─ Review Leader (L2)   – Dispatches review Workers, aggregates findings
+       ├─ Worker (code-reviewer)  – Code quality review
+       ├─ Worker (security)       – Security vulnerability review
+       └─ Worker (test-auditor)   – Test coverage audit
 ```
 
-Each layer runs as a separate Claude Code instance:
-- **Queen** = tmux session (gold border)
-- **Leader** = tmux window per issue (blue border), with git worktree isolation
-- **Worker** = tmux pane within Leader's window
+Each layer runs as a separate Claude Code instance in tmux. Communication flows through YAML reports and `tmux wait-for` signals. No external servers, databases, or APIs beyond GitHub.
 
-Communication flows through YAML reports and `tmux wait-for` signals. No external servers, databases, or APIs beyond GitHub.
+Workers receive **multi-layer context injection** (base + specialization):
+
+| Worker Role | Base Context | Specialization |
+|-------------|-------------|----------------|
+| `worker-coder` | `worker-base.md` | `coder.md` |
+| `worker-tester` | `worker-base.md` | `tester.md` |
+| `worker-code-reviewer` | `reviewer-base.md` | `code-reviewer.md` |
+| `worker-security` | `reviewer-base.md` | `security-reviewer.md` |
+| `worker-test-auditor` | `reviewer-base.md` | `test-auditor.md` |
 
 ## Prerequisites
 
@@ -85,11 +95,16 @@ npx queen-bee init --with-contexts
 This creates `.claude/queen-bee/contexts/` in your project. Edit any file to customize agent behavior. Delete a file to fall back to the package default.
 
 Key files:
-- `queen.md` — Queen orchestrator system prompt
+- `queen.md` — Queen orchestrator prompt
 - `leader.md` — Implementation Leader prompt
 - `review-leader.md` — Review Leader prompt
-- `executor.md` — Worker (coder/tester) prompt
-- `reviewer-base.md` — Worker (reviewer) prompt
+- `worker-base.md` — Worker base (autonomous rules, report format)
+- `coder.md` — Coder specialization (coding standards, Fail Fast, prohibited patterns)
+- `tester.md` — Tester specialization (test planning, boundary values, Given-When-Then)
+- `reviewer-base.md` — Reviewer base (review procedure, verdict rules)
+- `code-reviewer.md` — Code review specialization (design, quality, API, performance)
+- `security-reviewer.md` — Security specialization (OWASP Top 10, injection, auth)
+- `test-auditor.md` — Test audit specialization (coverage, edge cases, regression)
 - `agent-modes.json` — Environment variable to context file mapping
 
 ## Architecture
@@ -111,11 +126,13 @@ tmux session "qb"
 ├── [queen]     👑 Queen orchestrator (gold border)
 ├── [issue-42]  👑 Leader for issue #42 (blue border)
 │   ├── pane 0: Leader
-│   ├── pane 1: Worker (coder)
-│   └── pane 2: Worker (tester)
+│   ├── pane 1: ⚡ Worker (coder, green border)
+│   └── pane 2: 🧪 Worker (tester, cyan border)
 └── [review-42] 🔮 Review Leader for issue #42 (magenta border)
     ├── pane 0: Review Leader
-    └── pane 1: Worker (reviewer)
+    ├── pane 1: 🔍 Worker (code-reviewer, blue border)
+    ├── pane 2: 🛡 Worker (security, red border)
+    └── pane 3: 🧪 Worker (test-auditor, yellow border)
 ```
 
 Attach with `tmux attach -t qb` to watch all agents work in real-time.

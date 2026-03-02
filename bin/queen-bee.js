@@ -329,16 +329,54 @@ function check() {
   process.exit(ok ? 0 : 1);
 }
 
+// ── Help / Version ──
+
+function printHelp() {
+  console.log("queen-bee — 3-layer multi-agent orchestration for Claude Code\n");
+  console.log("Usage: queen-bee <command> [options]\n");
+  console.log("Commands:");
+  console.log("  init    Install queen-bee into the current project");
+  console.log("  update  Update queen-bee files (same as init)");
+  console.log("  check   Verify queen-bee setup\n");
+  console.log("Options for init/update:");
+  console.log("  --local          Register hook in .claude/settings.local.json (default)");
+  console.log("  --shared         Register hook in .claude/settings.json (team-shared)");
+  console.log("  -g, --global     Register hook in ~/.claude/settings.json (all projects)");
+  console.log("  --with-contexts  Copy default contexts for customization");
+  console.log("  --locale <lang>  Set locale (default: en, available: en, ja)\n");
+  console.log("Examples:");
+  console.log("  npx queen-bee init");
+  console.log("  npx queen-bee init --shared --locale ja");
+  console.log("  npx queen-bee init --with-contexts");
+  console.log("  npx queen-bee check");
+}
+
+function printVersion() {
+  const pkg = JSON.parse(fs.readFileSync(path.join(PKG_DIR, "package.json"), "utf8"));
+  console.log(`queen-bee v${pkg.version}`);
+}
+
 // ── Argument parsing ──
 
 function parseArgs(argv) {
   const args = argv.slice(2);
-  const command = args[0];
   const opts = {
     hookMode: "local",
     withContexts: false,
     locale: "en",
   };
+
+  // Check for help/version flags first (anywhere in args)
+  if (args.includes("-h") || args.includes("--help") || args.includes("help")) {
+    printHelp();
+    process.exit(0);
+  }
+  if (args.includes("-v") || args.includes("--version") || args.includes("version")) {
+    printVersion();
+    process.exit(0);
+  }
+
+  const command = args[0];
 
   for (let i = 1; i < args.length; i++) {
     switch (args[i]) {
@@ -378,16 +416,6 @@ switch (command) {
     check();
     break;
   default:
-    console.log("Usage: queen-bee <command> [options]\n");
-    console.log("Commands:");
-    console.log("  init    Install queen-bee into the current project");
-    console.log("  update  Update queen-bee files (same as init)");
-    console.log("  check   Verify queen-bee setup\n");
-    console.log("Options for init/update:");
-    console.log("  --local          Register hook in .claude/settings.local.json (default)");
-    console.log("  --shared         Register hook in .claude/settings.json (team-shared)");
-    console.log("  -g, --global     Register hook in ~/.claude/settings.json (all projects)");
-    console.log("  --with-contexts  Copy default contexts to .claude/queen-bee/contexts/ for customization");
-    console.log("  --locale <lang>  Set locale for agent prompts (default: en, available: en, ja)");
+    printHelp();
     process.exit(command ? 1 : 0);
 }
