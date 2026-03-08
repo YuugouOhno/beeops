@@ -130,6 +130,11 @@ queued → dispatched → leader_working → review_dispatched → reviewing →
               ↑                                                        │
               └──── fixing ←── fix_required ───────────────────────────┘
                      （最大3回ループ）
+
+（短縮パス: 既存 PR 検出時）
+review_dispatched → reviewing → done
+                                  │
+              fixing ←── fix_required
 ```
 
 | ステータス | 意味 |
@@ -149,7 +154,7 @@ queued → dispatched → leader_working → review_dispatched → reviewing →
 
 ## タスク選択ルール
 
-1. `queued` かつ `depends_on` が空（または全て `done`）のタスクを選択
+1. `queued` または `review_dispatched`（既存 PR あり）かつ `depends_on` が空（または全て `done`）のタスクを選択
 2. `blocked_reason` があるタスクはスキップ（ログに「スキップ: {理由}」を記録）
 3. 優先度順: high → medium → low
 4. 同一優先度内では Issue 番号が小さい方を先に
@@ -177,11 +182,17 @@ review_window: "review-42"      # review window 名
 3. タスクの type と assignee に応じて実行:
 
 ### type: issue（または assignee: leader）
-1. **Skill: `bo-dispatch`** を発動し、Leader を起動
+
+**まず、タスクに既存 PR があるか確認する**（`pr` フィールドが非null かつ status が `review_dispatched`）:
+- **PR あり** → Leader をスキップ。bo-dispatch で Review Leader を直接起動し、既存 PR が Issue の要件を満たしているか検証する。
+- **PR なし** → 通常フロー: まず Leader を起動。
+
+開始ポイントを決定した後:
+1. **Skill: `bo-dispatch`** を発動し、Leader（または PR 既存なら Review Leader）を起動
 2. bo-dispatch が返す結果（レポート内容）に基づいて判定:
    - Leader completed → `review_dispatched` に更新 → Review Leader 起動（再度 bo-dispatch）
    - Review Leader approve → `ci_checking` → CI 確認
-   - Review Leader fix_required → review_count < 3 なら `fixing` → Leader 再起動 (fix mode)
+   - Review Leader fix_required → review_count < 3 なら `fixing` → Leader 再起動（fix mode、既存ブランチを再利用）
    - 失敗 → `error` に更新
 
 ### type: adhoc, assignee: orchestrator

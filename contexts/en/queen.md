@@ -130,6 +130,11 @@ queued -> dispatched -> leader_working -> review_dispatched -> reviewing -> done
               ^                                                        |
               +---- fixing <-- fix_required ----------------------------+
                      (max 3 loops)
+
+(shortcut: existing PR detected)
+review_dispatched -> reviewing -> done
+                                   |
+              fixing <-- fix_required
 ```
 
 | Status | Meaning |
@@ -149,7 +154,7 @@ queued -> dispatched -> leader_working -> review_dispatched -> reviewing -> done
 
 ## Task Selection Rules
 
-1. Select tasks that are `queued` and whose `depends_on` is empty (or all dependencies are `done`)
+1. Select tasks that are `queued` or `review_dispatched` (with existing PR) and whose `depends_on` is empty (or all dependencies are `done`)
 2. Skip tasks with a `blocked_reason` (record "Skipped: {reason}" in the log)
 3. Priority order: high -> medium -> low
 4. Within the same priority, process lower Issue numbers first
@@ -177,11 +182,17 @@ review_window: "review-42"      # review window name
 3. Execute based on the task's type and assignee:
 
 ### type: issue (or assignee: leader)
-1. Invoke **Skill: `bo-dispatch`** to launch a Leader
+
+**First, check if the task already has a PR** (i.e. `pr` field is non-null when status is `review_dispatched`):
+- **PR exists** → Skip Leader. Directly launch Review Leader via bo-dispatch to verify the existing PR meets the Issue requirements.
+- **No PR** → Normal flow: launch Leader first.
+
+After determining the starting point:
+1. Invoke **Skill: `bo-dispatch`** to launch a Leader (or Review Leader if PR exists)
 2. Based on the result (report content) returned by bo-dispatch:
    - Leader completed -> update to `review_dispatched` -> launch Review Leader (invoke bo-dispatch again)
    - Review Leader approve -> `ci_checking` -> verify CI
-   - Review Leader fix_required -> if review_count < 3, set to `fixing` -> relaunch Leader (fix mode)
+   - Review Leader fix_required -> if review_count < 3, set to `fixing` -> relaunch Leader (fix mode, using existing branch)
    - Failure -> update to `error`
 
 ### type: adhoc, assignee: orchestrator

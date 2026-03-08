@@ -26,6 +26,22 @@ gh issue list -R "$REPO" --state open --json number,title,labels,assignees --lim
 
 If 0 issues, display "No issues to process" and exit.
 
+### 2.5. Detect Existing PRs
+
+For each open Issue, check if a linked PR already exists:
+
+```bash
+gh pr list -R "$REPO" --search "linked:issue:{number}" --state open --json number,url,headRefName --limit 1
+```
+
+If no result, also try keyword search as fallback:
+
+```bash
+gh pr list -R "$REPO" --search "{issue_number} in:title" --state open --json number,url,headRefName --limit 1
+```
+
+Store the results (PR URL + branch name) for use in Step 4.
+
 ### 3. Load queue.yaml
 
 If `.claude/tasks/queue.yaml` exists, read it. Otherwise initialize:
@@ -37,7 +53,9 @@ tasks: []
 
 ### 4. Diff Detection and Raw Addition
 
-Add Issues not present in queue.yaml with `raw` status:
+Add Issues not present in queue.yaml. If an existing PR was detected in Step 2.5, start from `review_dispatched`; otherwise use `raw` status:
+
+**No existing PR (normal flow):**
 
 ```yaml
 - id: "ISSUE-{number}"
@@ -51,6 +69,22 @@ Add Issues not present in queue.yaml with `raw` status:
   pr: null
   log:
     - "{ISO8601} created from gh issue"
+```
+
+**Existing PR detected (skip to review):**
+
+```yaml
+- id: "ISSUE-{number}"
+  issue: {number}
+  title: "{title}"
+  status: review_dispatched
+  priority: high
+  branch: "{headRefName from PR}"
+  depends_on: []
+  review_count: 0
+  pr: "{PR URL}"
+  log:
+    - "{ISO8601} created from gh issue (existing PR #{pr_number} detected, starting from review)"
 ```
 
 - Skip Issues already in queue.yaml (with status other than done)
