@@ -117,6 +117,32 @@ function checkPrerequisites() {
   return allOk;
 }
 
+// ── .gitignore management ──
+
+const GITIGNORE_ENTRIES = [
+  ".claude/tasks/",
+  ".claude/worktrees/",
+];
+
+function updateGitignore(root) {
+  const gitignorePath = path.join(root, ".gitignore");
+  let content = "";
+  if (fs.existsSync(gitignorePath)) {
+    content = fs.readFileSync(gitignorePath, "utf8");
+  }
+
+  const lines = content.split("\n");
+  const missing = GITIGNORE_ENTRIES.filter((entry) => !lines.some((line) => line.trim() === entry));
+
+  if (missing.length === 0) return;
+
+  const block = "\n# beeops runtime artifacts\n" + missing.join("\n") + "\n";
+  fs.writeFileSync(gitignorePath, content.trimEnd() + block);
+  for (const entry of missing) {
+    console.log(`  gitignore: added ${entry}`);
+  }
+}
+
 // ── Hook registration ──
 
 function resolveSettingsFile(root, mode) {
@@ -267,16 +293,19 @@ function init(opts) {
     }
   }
 
-  // 4. Register hooks (UserPromptSubmit)
+  // 4. Update .gitignore (runtime artifacts should not be tracked)
+  updateGitignore(root);
+
+  // 5. Register hooks (UserPromptSubmit)
   updateSettingsHook(root, opts.hookMode);
 
-  // 5. Save locale preference
+  // 6. Save locale preference
   const boDir = path.join(claudeDir, "beeops");
   ensureDir(boDir);
   fs.writeFileSync(path.join(boDir, "locale"), opts.locale + "\n");
   console.log(`  locale: ${opts.locale} (saved to .claude/beeops/locale)`);
 
-  // 6. Copy contexts if --with-contexts
+  // 7. Copy contexts if --with-contexts
   if (opts.withContexts) {
     const destContexts = path.join(claudeDir, "beeops", "contexts");
     copyDir(CONTEXTS_SRC, destContexts);
