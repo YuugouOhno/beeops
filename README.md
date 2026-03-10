@@ -69,6 +69,15 @@ npx beeops init [options]
 
 To customize agent behavior, run `npx beeops init --with-contexts` and edit files in `.claude/beeops/contexts/`. Delete any file to fall back to the package default.
 
+To update beeops in an existing project:
+
+```bash
+npm update beeops
+npx beeops init
+```
+
+This updates the package and re-deploys commands, skills, and hooks. Your custom contexts in `.claude/beeops/contexts/` are preserved.
+
 To verify your installation:
 
 ```bash

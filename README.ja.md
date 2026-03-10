@@ -139,6 +139,15 @@ tmux session "bo"
 
 `tmux attach -t bo` で全エージェントの動作をリアルタイムに確認できます。
 
+## アップデート
+
+```bash
+npm update beeops
+npx beeops init
+```
+
+パッケージを更新し、コマンド・スキル・フックを再デプロイします。`.claude/beeops/contexts/` のカスタムコンテキストはそのまま保持されます。
+
 ## 検証
 
 ```bash

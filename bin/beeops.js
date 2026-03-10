@@ -222,8 +222,9 @@ function updateSettingsHook(root, mode) {
     }
   }
 
-  // UserPromptSubmit: bo-prompt-context.py (resolve path at runtime, not init time)
-  const hookCommand = `python3 "$(node -p "require('path').dirname(require.resolve('beeops/package.json'))")/hooks/bo-prompt-context.py"`;
+  // UserPromptSubmit: bo-prompt-context.py
+  // Resolve path at runtime; silently skip if beeops is not installed in the project
+  const hookCommand = `_BO=$(node -p "require('path').dirname(require.resolve('beeops/package.json'))" 2>/dev/null) && python3 "$_BO/hooks/bo-prompt-context.py" || true`;
   const r1 = upsertHook(settings.hooks, "UserPromptSubmit", "bo-prompt-context.py", hookCommand);
   console.log(`  ${r1}: ${label} (UserPromptSubmit hook)`);
 
