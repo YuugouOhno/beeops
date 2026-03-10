@@ -222,8 +222,9 @@ function updateSettingsHook(root, mode) {
     }
   }
 
-  // UserPromptSubmit: bo-prompt-context.py
-  const r1 = upsertHook(settings.hooks, "UserPromptSubmit", "bo-prompt-context.py", `python3 ${HOOK_SRC}`);
+  // UserPromptSubmit: bo-prompt-context.py (resolve path at runtime, not init time)
+  const hookCommand = `python3 "$(node -p "require('path').dirname(require.resolve('beeops/package.json'))")/hooks/bo-prompt-context.py"`;
+  const r1 = upsertHook(settings.hooks, "UserPromptSubmit", "bo-prompt-context.py", hookCommand);
   console.log(`  ${r1}: ${label} (UserPromptSubmit hook)`);
 
   fs.writeFileSync(settingsFile, JSON.stringify(settings, null, 2) + "\n");
