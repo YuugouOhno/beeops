@@ -1,0 +1,139 @@
+{
+  "modes": {
+    "BO_QUEEN": {
+      "context": ["queen.md"],
+
+      "description": "beeops N1: Queen (orquestadora)"
+    },
+    "BO_LEADER": {
+      "context": ["leader.md"],
+
+      "description": "beeops N2: Leader (responsable de implementación)"
+    },
+    "BO_REVIEW_LEADER": {
+      "context": ["review-leader.md"],
+
+      "description": "beeops N2: Review Leader (responsable de revisión)"
+    },
+    "BO_WORKER_CODER": {
+      "context": ["worker-base.md", "coder.md"],
+
+      "description": "beeops N3: Worker (implementación)"
+    },
+    "BO_WORKER_TESTER": {
+      "context": ["worker-base.md", "tester.md"],
+
+      "description": "beeops N3: Worker (escritura de pruebas)"
+    },
+    "BO_WORKER_CODE_REVIEWER": {
+      "context": ["reviewer-base.md", "code-reviewer.md"],
+
+      "description": "beeops N3: Worker (revisión de código)"
+    },
+    "BO_WORKER_SECURITY": {
+      "context": ["reviewer-base.md", "security-reviewer.md"],
+
+      "description": "beeops N3: Worker (revisión de seguridad)"
+    },
+    "BO_WORKER_TEST_AUDITOR": {
+      "context": ["reviewer-base.md", "test-auditor.md"],
+
+      "description": "beeops N3: Worker (auditoría de pruebas)"
+    },
+    "BO_CONTENT_QUEEN": {
+      "context": ["content-queen.md"],
+      "description": "bee-content N1: Content Queen (orquestadora)"
+    },
+    "BO_CONTENT_LEADER": {
+      "context": ["content-leader.md"],
+      "description": "bee-content N2: Content Leader (directora de pieza)"
+    },
+    "BO_CONTENT_CREATOR": {
+      "context": ["content-creator.md"],
+      "description": "bee-content N3: Worker (creación de contenido)"
+    },
+    "BO_CONTENT_REVIEWER": {
+      "context": ["content-reviewer.md"],
+      "description": "bee-content N3: Worker (revisión de contenido)"
+    },
+    "BO_CONTENT_RESEARCHER": {
+      "context": ["content-researcher.md"],
+      "description": "bee-content N3: Worker (investigación)"
+    }
+  },
+  "roles": {
+    "leader": {
+      "env_var": "BO_LEADER",
+      "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
+      "max_turns": 80,
+      "description": "beeops: responsable de implementación de un Issue"
+    },
+    "review-leader": {
+      "env_var": "BO_REVIEW_LEADER",
+      "allowed_tools": "Read Grep Glob Bash Skill",
+      "max_turns": 40,
+      "description": "beeops: responsable de revisión de un PR"
+    },
+    "worker-coder": {
+      "env_var": "BO_WORKER_CODER",
+      "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
+      "max_turns": 30,
+      "description": "beeops: implementación de una subtarea"
+    },
+    "worker-tester": {
+      "env_var": "BO_WORKER_TESTER",
+      "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
+      "max_turns": 30,
+      "description": "beeops: escritura de pruebas para una subtarea"
+    },
+    "worker-code-reviewer": {
+      "env_var": "BO_WORKER_CODE_REVIEWER",
+      "allowed_tools": "Read Grep Glob Bash Skill",
+      "max_turns": 15,
+      "description": "beeops: revisión de calidad de código"
+    },
+    "worker-security": {
+      "env_var": "BO_WORKER_SECURITY",
+      "allowed_tools": "Read Grep Glob Bash Skill",
+      "max_turns": 15,
+      "description": "beeops: revisión de seguridad"
+    },
+    "worker-test-auditor": {
+      "env_var": "BO_WORKER_TEST_AUDITOR",
+      "allowed_tools": "Read Grep Glob Bash Skill",
+      "max_turns": 15,
+      "description": "beeops: auditoría de pruebas"
+    },
+    "content-queen": {
+      "env_var": "BO_CONTENT_QUEEN",
+      "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
+      "max_turns": 80,
+      "description": "bee-content: orquesta todas las tareas de creación de contenido"
+    },
+    "content-leader": {
+      "env_var": "BO_CONTENT_LEADER",
+      "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
+      "max_turns": 50,
+      "description": "bee-content: dirige una pieza de contenido individual"
+    },
+    "content-creator": {
+      "env_var": "BO_CONTENT_CREATOR",
+      "allowed_tools": "Read Write Edit Bash Glob Grep",
+      "max_turns": 30,
+      "description": "bee-content: worker de creación de contenido"
+    },
+    "content-reviewer": {
+      "env_var": "BO_CONTENT_REVIEWER",
+      "allowed_tools": "Read Bash Glob Grep",
+      "max_turns": 20,
+      "description": "bee-content: worker de revisión de contenido"
+    },
+    "content-researcher": {
+      "env_var": "BO_CONTENT_RESEARCHER",
+      "allowed_tools": "Read Bash Glob Grep WebSearch WebFetch",
+      "max_turns": 20,
+      "description": "bee-content: worker de investigación y recopilación de información"
+    }
+  },
+  "default_context": "default.md"
+}
