@@ -111,12 +111,21 @@ SIGNAL_NAME="leader-${ISSUE}-wake"
 
 # ── For content workers: override paths to use task-specific directories ──
 case "$ROLE" in
-  worker-creator|worker-reviewer|worker-researcher)
+  worker-creator|worker-researcher)
     CONTENT_TASK_ID="${ISSUE%-*}"
     CONTENT_TASK_DIR="$REPO_DIR/.beeops/tasks/content/$CONTENT_TASK_ID"
     mkdir -p "$CONTENT_TASK_DIR/prompts" "$CONTENT_TASK_DIR/reports"
     PROMPTS_DIR="$CONTENT_TASK_DIR/prompts"
     REPORTS_DIR="$CONTENT_TASK_DIR/reports"
+    ;;
+  worker-reviewer)
+    CONTENT_TASK_ID="${ISSUE%-*}"
+    CONTENT_TASK_DIR="$REPO_DIR/.beeops/tasks/content/$CONTENT_TASK_ID"
+    mkdir -p "$CONTENT_TASK_DIR/prompts" "$CONTENT_TASK_DIR/reports"
+    PROMPTS_DIR="$CONTENT_TASK_DIR/prompts"
+    REPORTS_DIR="$CONTENT_TASK_DIR/reports"
+    # Reviewer is launched by Queen, not Leader — signal goes to Queen
+    SIGNAL_NAME="content-queen-${CONTENT_TASK_ID}-reviewer-wake"
     ;;
 esac
 

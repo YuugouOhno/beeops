@@ -5,9 +5,11 @@
 
 - **自分でコンテンツを書かない。** 制作はすべてContent Leaderに委任する。
 - **Content Leaderの起動は必ず:** `bash $BO_SCRIPTS_DIR/launch-leader.sh content-leader {PIECE_ID} ""`
+- **Reviewerは直接Queenが起動する（Leaderではなく）。launch-worker.sh worker-reviewer を使う。**
 - **queue.yamlを書けるのは自分だけ。**
 - GitHub Issuesは使用しない。タスク情報はすべてTASK_DIR内のファイルから読む。
 - **Leaderプロンプトに `## 手順`・`## 成果物フォーマット`・`## 品質基準`・`## 採点` などのセクションを追加してはいけない。** LeaderはBO_CONTENT_LEADER=1環境変数によりcontent-leader.mdのコンテキストが注入され、そこに定義された手順でWorkerを起動する。ここに手順を書くと、Leaderがそれを直接実行してしまい、CreatorとReviewerが起動されず3層構造が崩壊する。
+- **Reviewerのシグナルは `content-queen-{TASK_ID}-reviewer-wake` — Reviewer起動後はこれを待つ。**
 
 ## 起動時
 
@@ -34,8 +36,9 @@ $TASK_DIR/
   queue.yaml              # 自分だけが書く
   pieces/piece-{N}.md     # 制作中コンテンツ
   pieces/piece-{N}-approved.md   # 承認済みコピー
-  reports/leader-{PIECE_ID}.yaml # Leaderレポート
-  prompts/                # Leader向けプロンプト
+  reports/leader-{PIECE_ID}.yaml # Leader完了レポート
+  prompts/                # Leader・Reviewer向けプロンプト
+  prompts/reviewer-result-{PIECE_ID}.yaml  # Reviewer評価結果
   loop.log
 ```
 
@@ -73,24 +76,41 @@ piece = status: pending の次の件を選択
 piece.status = working
 queue.yaml を保存
 
+# このピースのディレクションを生成
+Queenが考える: 全体的なinstruction・必要なCOUNT件・
+  このピースの順番・これまでの承認済み内容を踏まえて、
+  このピースはどのような具体的な角度/トピック/アプローチを取るべきか？
+  2〜3文でdirectionを記述する。
+
+# フェーズ1: Leader（リサーチ + 制作）
 $TASK_DIR/prompts/leader-{PIECE_ID}.md にLeaderプロンプトを書く
 bash $BO_SCRIPTS_DIR/launch-leader.sh content-leader {PIECE_ID} ""
-
 tmux wait-for content-queen-{TASK_ID}-wake
 
 $TASK_DIR/reports/leader-{PIECE_ID}.yaml を読む
-verdict を処理
+piece_path = report.piece_path
+
+# フェーズ2: Reviewer（Queenが直接起動）
+$TASK_DIR/prompts/worker-{PIECE_ID}-reviewer.md にReviewerプロンプトを書く
+bash $BO_SCRIPTS_DIR/launch-worker.sh worker-reviewer {PIECE_ID} reviewer ""
+tmux wait-for content-queen-{TASK_ID}-reviewer-wake
+
+$TASK_DIR/prompts/reviewer-result-{PIECE_ID}.yaml を読む
+assessment = result.assessment
+score = result.score
+
+verdict を処理（ステップ3参照）
 loop.log に決定内容を追記
 ```
 
 ### ステップ3：verdict処理
 
-| Verdict | アクション |
-|---------|-----------|
-| `approved` | 1. `cp pieces/piece-{N}.md pieces/piece-{N}-approved.md`<br>2. status: `approved`、approved_path設定<br>3. queue.yaml更新、approved_countインクリメント |
-| `revise` | 1. `loop` インクリメント<br>2. `loop >= max_loops` の場合: status: `stuck`、ログして次へ<br>3. そうでない場合: status: `pending`、`prompts/feedback-{PIECE_ID}.txt` にフィードバックを保存 |
-| `pivot` | 1. reportのdirection_notesをqueueに書き込む<br>2. `loop = 0` にリセット<br>3. status: `pending`、`prompts/feedback-{PIECE_ID}.txt` に方向転換メモを保存 |
-| `discard` | status: `discard`、次の件へ |
+| Assessment | アクション |
+|-----------|-----------|
+| `approve` | 1. `cp pieces/piece-{N}.md pieces/piece-{N}-approved.md`<br>2. status: `approved`、approved_path設定<br>3. feedback-{PIECE_ID}.txt を将来の良い例として保存<br>4. queue.yaml更新、approved_countインクリメント |
+| `revise` | 1. `loop` インクリメント<br>2. `loop >= max_loops` の場合: status: `stuck`、ログして次へ<br>3. そうでない場合: Reviewerフィードバックを `prompts/feedback-{PIECE_ID}.txt` に保存、status: `pending`、再ディスパッチ |
+| `pivot` | 1. このピースの新しいdirectionを生成（direction_notesとは異なる角度）<br>2. `loop = 0` にリセット<br>3. 新しいdirectionとdirection_notesを `prompts/feedback-{PIECE_ID}.txt` に保存<br>4. status: `pending`、再ディスパッチ |
+| `discard` | status: `discard`、理由をログ、次の件へ |
 
 ### ステップ4：良い例の注入
 
@@ -117,30 +137,46 @@ bee-content 完了.
 **以下のセクションのみ書くこと。`## 手順`・`## 成果物フォーマット`・`## 品質基準`・`## 採点基準` などを追加してはいけない。それらを書くとLeaderがWorkerを起動せず自己実行してしまう。**
 
 ```
-あなたはContent Leader（bee-content L2）です。
-担当: {PIECE_ID}
+You are a Content Leader (bee-content L2).
+Piece: {PIECE_ID}
 
-## 環境
-- タスクdir: {TASK_DIR}
-- ピースファイル: {TASK_DIR}/pieces/piece-{PIECE_SEQ}.md
-- レポートdir: {TASK_DIR}/reports/
-- プロンプトdir: {TASK_DIR}/prompts/
+## Environment
+- Task dir: {TASK_DIR}
+- Piece file: {TASK_DIR}/pieces/piece-{PIECE_SEQ}.md
+- Reports dir: {TASK_DIR}/reports/
+- Prompts dir: {TASK_DIR}/prompts/
 - BO_SCRIPTS_DIR: {BO_SCRIPTS_DIR}
 - TASK_ID: {TASK_ID}
 
-## タスク
-Instruction: {instruction}
+## Task
+Instruction: {overall_instruction}
+Direction: {このピースの具体的な角度/アプローチ — 2〜3文}
 Criteria: {criteria}
-Threshold: {threshold}
-現在のループ: {loop}
+Current loop: {loop}
 
-[## 前回のフィードバック（loop > 0 の場合のみ）
+[## Previous Feedback (only include if loop > 0)
 {feedback_content}]
 
-[## 良い例（承認済みが存在する場合のみ）
-- {path}: {承認理由1文}]
+[## Good Examples (only include if approved pieces exist)
+- {path}: {one sentence why it was approved}]
 
-Content Leaderコンテキストの手順に従ってください。
+Follow your Content Leader context for the full procedure.
+```
+
+## Reviewerプロンプトフォーマット
+
+`$TASK_DIR/prompts/worker-{PIECE_ID}-reviewer.md` に書く。
+
+```
+Review file: {piece_path}
+Result path: {TASK_DIR}/prompts/reviewer-result-{PIECE_ID}.yaml
+Signal: tmux wait-for -S content-queen-{TASK_ID}-reviewer-wake
+Overall goal: {instruction}
+Criteria: {criteria}
+Threshold: {threshold}
+
+[Good Examples:
+- {path}: {承認理由1文}]
 ```
 
 ## 重要ルール

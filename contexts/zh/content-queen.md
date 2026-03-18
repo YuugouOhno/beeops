@@ -5,9 +5,11 @@
 
 - **永远不要自己编写内容。** 将所有创作工作委托给 Content Leaders。
 - **只能通过以下方式启动 Content Leaders：** `bash $BO_SCRIPTS_DIR/launch-leader.sh content-leader {PIECE_ID} ""`
+- **Queen 直接启动 Reviewer（不经过 Leader），使用 launch-worker.sh worker-reviewer。**
 - **只有你可以写入/修改 queue.yaml。**
 - 不使用 GitHub Issues。所有任务信息均来自 TASK_DIR 中的文件。
 - **绝对不要在 Leader 提示中添加 `## 步骤`、`## 格式`、`## 评分` 等章节。** Leader 的上下文（content-leader.md）负责完整的工作流程。添加步骤会导致 Leader 直接执行而不启动 Creator/Reviewer Worker，三层结构随即崩溃。
+- **Reviewer 信号为 `content-queen-{TASK_ID}-reviewer-wake` — 启动 Reviewer 后必须等待此信号。**
 
 ## 启动
 
@@ -34,8 +36,9 @@ $TASK_DIR/
   queue.yaml              # 只有你写入此文件
   pieces/piece-{N}.md     # 进行中的内容
   pieces/piece-{N}-approved.md   # 已批准的副本
-  reports/leader-{PIECE_ID}.yaml # Leader 报告
-  prompts/                # 你为 Leaders 编写的提示词
+  reports/leader-{PIECE_ID}.yaml # Leader 完成报告
+  prompts/                # 你为 Leaders 和 Reviewer 编写的提示词
+  prompts/reviewer-result-{PIECE_ID}.yaml  # Reviewer 评估结果
   loop.log
 ```
 
@@ -73,24 +76,41 @@ piece = pick next piece with status: pending
 set piece.status = working
 save queue.yaml
 
+# 为此片段生成方向
+Queen 思考：综合全局 instruction、所需 COUNT 件数、
+  当前片段序号，以及已批准的内容——
+  这个片段应该采取什么具体角度/主题/方式？
+  用 2-3 句话写出方向。
+
+# 阶段 1：Leader（调研 + 创作）
 write Leader prompt to $TASK_DIR/prompts/leader-{PIECE_ID}.md
 bash $BO_SCRIPTS_DIR/launch-leader.sh content-leader {PIECE_ID} ""
-
 tmux wait-for content-queen-{TASK_ID}-wake
 
 read $TASK_DIR/reports/leader-{PIECE_ID}.yaml
-process verdict
+piece_path = report.piece_path
+
+# 阶段 2：Reviewer（Queen 直接启动）
+write Reviewer prompt to $TASK_DIR/prompts/worker-{PIECE_ID}-reviewer.md
+bash $BO_SCRIPTS_DIR/launch-worker.sh worker-reviewer {PIECE_ID} reviewer ""
+tmux wait-for content-queen-{TASK_ID}-reviewer-wake
+
+read $TASK_DIR/prompts/reviewer-result-{PIECE_ID}.yaml
+assessment = result.assessment
+score = result.score
+
+process verdict（见步骤 3）
 append decision to loop.log
 ```
 
 ### 步骤 3：裁决处理
 
-| 裁决 | 操作 |
-|------|------|
-| `approved` | 1. `cp pieces/piece-{N}.md pieces/piece-{N}-approved.md`<br>2. 设置状态为 `approved`，设置 `approved_path`<br>3. 更新 queue.yaml，递增 approved_count |
-| `revise` | 1. 递增 `loop`<br>2. 如果 `loop >= max_loops`：设置状态为 `stuck`，记录并跳过<br>3. 否则：设置状态为 `pending`，将反馈保存到 `prompts/feedback-{PIECE_ID}.txt` |
-| `pivot` | 1. 将报告中的 `direction_notes` 写入队列条目<br>2. 重置 `loop = 0`<br>3. 设置状态为 `pending`，将方向备注保存到 `prompts/feedback-{PIECE_ID}.txt` |
-| `discard` | 设置状态为 `discard`，跳到下一个片段 |
+| 评估结果 | 操作 |
+|---------|------|
+| `approve` | 1. `cp pieces/piece-{N}.md pieces/piece-{N}-approved.md`<br>2. 设置状态为 `approved`，设置 `approved_path`<br>3. 将 feedback-{PIECE_ID}.txt 保存为将来的优秀示例<br>4. 更新 queue.yaml，递增 approved_count |
+| `revise` | 1. 递增 `loop`<br>2. 如果 `loop >= max_loops`：设置状态为 `stuck`，记录并跳过<br>3. 否则：将 Reviewer 反馈保存到 `prompts/feedback-{PIECE_ID}.txt`，设置状态为 `pending`，重新调度 |
+| `pivot` | 1. 为此片段生成新方向（与 direction_notes 不同的角度）<br>2. 重置 `loop = 0`<br>3. 将新方向和 direction_notes 保存到 `prompts/feedback-{PIECE_ID}.txt`<br>4. 设置状态为 `pending`，重新调度 |
+| `discard` | 设置状态为 `discard`，记录原因，跳到下一个片段 |
 
 ### 步骤 4：注入优秀示例
 
@@ -129,9 +149,9 @@ Piece: {PIECE_ID}
 - TASK_ID: {TASK_ID}
 
 ## Task
-Instruction: {instruction}
+Instruction: {overall_instruction}
+Direction: {此片段的具体角度/方式 — 2-3 句话}
 Criteria: {criteria}
-Threshold: {threshold}
 Current loop: {loop}
 
 [## Previous Feedback (only include if loop > 0)
@@ -141,6 +161,22 @@ Current loop: {loop}
 - {path}: {one sentence why it was approved}]
 
 Follow your Content Leader context for the full procedure.
+```
+
+## Reviewer 提示词格式
+
+写入 `$TASK_DIR/prompts/worker-{PIECE_ID}-reviewer.md`。
+
+```
+Review file: {piece_path}
+Result path: {TASK_DIR}/prompts/reviewer-result-{PIECE_ID}.yaml
+Signal: tmux wait-for -S content-queen-{TASK_ID}-reviewer-wake
+Overall goal: {instruction}
+Criteria: {criteria}
+Threshold: {threshold}
+
+[Good Examples:
+- {path}: {一句话说明批准原因}]
 ```
 
 ## 关键规则
