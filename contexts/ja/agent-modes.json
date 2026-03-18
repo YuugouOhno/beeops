@@ -39,6 +39,26 @@
       "context": ["reviewer-base.md", "test-auditor.md"],
 
       "description": "beeops L3: Worker（テスト監査）"
+    },
+    "BO_CONTENT_QUEEN": {
+      "context": ["content-queen.md"],
+      "description": "bee-content L1: Content Queen（全体管理）"
+    },
+    "BO_CONTENT_LEADER": {
+      "context": ["content-leader.md"],
+      "description": "bee-content L2: Content Leader（制作責任者）"
+    },
+    "BO_CONTENT_CREATOR": {
+      "context": ["content-creator.md"],
+      "description": "bee-content L3: Worker（コンテンツ作成）"
+    },
+    "BO_CONTENT_REVIEWER": {
+      "context": ["content-reviewer.md"],
+      "description": "bee-content L3: Worker（コンテンツレビュー）"
+    },
+    "BO_CONTENT_RESEARCHER": {
+      "context": ["content-researcher.md"],
+      "description": "bee-content L3: Worker（調査・情報収集）"
     }
   },
   "roles": {
@@ -83,6 +103,36 @@
       "allowed_tools": "Read Grep Glob Bash Skill",
       "max_turns": 15,
       "description": "beeops: テスト監査"
+    },
+    "content-queen": {
+      "env_var": "BO_CONTENT_QUEEN",
+      "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
+      "max_turns": 80,
+      "description": "bee-content: コンテンツ制作タスク全体を管理"
+    },
+    "content-leader": {
+      "env_var": "BO_CONTENT_LEADER",
+      "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
+      "max_turns": 50,
+      "description": "bee-content: 1件のコンテンツ制作を指揮"
+    },
+    "content-creator": {
+      "env_var": "BO_CONTENT_CREATOR",
+      "allowed_tools": "Read Write Edit Bash Glob Grep",
+      "max_turns": 30,
+      "description": "bee-content: コンテンツ作成Worker"
+    },
+    "content-reviewer": {
+      "env_var": "BO_CONTENT_REVIEWER",
+      "allowed_tools": "Read Bash Glob Grep",
+      "max_turns": 20,
+      "description": "bee-content: コンテンツレビューWorker"
+    },
+    "content-researcher": {
+      "env_var": "BO_CONTENT_RESEARCHER",
+      "allowed_tools": "Read Bash Glob Grep WebSearch WebFetch",
+      "max_turns": 20,
+      "description": "bee-content: 調査・情報収集Worker"
     }
   },
   "default_context": "default.md"

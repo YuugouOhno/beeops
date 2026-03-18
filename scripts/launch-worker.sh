@@ -70,8 +70,38 @@ case "$ROLE" in
     MAX_TURNS=15
     ALLOWED_TOOLS="Read,Grep,Glob,Bash,Skill"
     ;;
+  worker-creator)
+    SESSION="bee-content"
+    ROLE_SHORT="worker-creator"
+    ENV_VAR="BO_CONTENT_CREATOR"
+    WINDOW_NAME="piece-${ISSUE}"
+    BORDER_FG="green"
+    ROLE_ICON="✍️"
+    MAX_TURNS=30
+    ALLOWED_TOOLS="Read,Write,Edit,Bash,Glob,Grep"
+    ;;
+  worker-reviewer)
+    SESSION="bee-content"
+    ROLE_SHORT="worker-reviewer"
+    ENV_VAR="BO_CONTENT_REVIEWER"
+    WINDOW_NAME="piece-${ISSUE}"
+    BORDER_FG="blue"
+    ROLE_ICON="🔍"
+    MAX_TURNS=20
+    ALLOWED_TOOLS="Read,Bash,Glob,Grep"
+    ;;
+  worker-researcher)
+    SESSION="bee-content"
+    ROLE_SHORT="worker-researcher"
+    ENV_VAR="BO_CONTENT_RESEARCHER"
+    WINDOW_NAME="piece-${ISSUE}"
+    BORDER_FG="yellow"
+    ROLE_ICON="🔎"
+    MAX_TURNS=20
+    ALLOWED_TOOLS="Read,Bash,Glob,Grep,WebSearch,WebFetch"
+    ;;
   *)
-    echo "Unknown role: $ROLE (expected: worker-coder | worker-tester | worker-code-reviewer | worker-security | worker-test-auditor)" >&2
+    echo "Unknown role: $ROLE (expected: worker-coder | worker-tester | worker-code-reviewer | worker-security | worker-test-auditor | worker-creator | worker-reviewer | worker-researcher)" >&2
     exit 1
     ;;
 esac
@@ -79,9 +109,23 @@ esac
 PANE_TITLE="${ROLE_ICON} ${ROLE_SHORT}-${ISSUE}-${SUBTASK_ID}"
 SIGNAL_NAME="leader-${ISSUE}-wake"
 
+# ── For content workers: override paths to use task-specific directories ──
+case "$ROLE" in
+  worker-creator|worker-reviewer|worker-researcher)
+    CONTENT_TASK_ID="${ISSUE%-*}"
+    CONTENT_TASK_DIR="$REPO_DIR/.beeops/tasks/content/$CONTENT_TASK_ID"
+    mkdir -p "$CONTENT_TASK_DIR/prompts" "$CONTENT_TASK_DIR/reports"
+    PROMPTS_DIR="$CONTENT_TASK_DIR/prompts"
+    REPORTS_DIR="$CONTENT_TASK_DIR/reports"
+    ;;
+esac
+
 # ── Determine work directory (use Leader's worktree if available) ──
-WORKTREE_PATH="$REPO_DIR/.beeops/worktrees/$BRANCH"
-if [ -d "$WORKTREE_PATH" ]; then
+WORKTREE_PATH=""
+if [ -n "$BRANCH" ]; then
+  WORKTREE_PATH="$REPO_DIR/.beeops/worktrees/$BRANCH"
+fi
+if [ -n "$WORKTREE_PATH" ] && [ -d "$WORKTREE_PATH" ]; then
   WORK_DIR="$WORKTREE_PATH"
 else
   WORK_DIR="$REPO_DIR"

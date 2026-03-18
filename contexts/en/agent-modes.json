@@ -40,13 +40,25 @@
 
       "description": "beeops L3: Worker (test audit)"
     },
+    "BO_CONTENT_QUEEN": {
+      "context": ["content-queen.md"],
+      "description": "bee-content L1: Content Queen (orchestrator)"
+    },
+    "BO_CONTENT_LEADER": {
+      "context": ["content-leader.md"],
+      "description": "bee-content L2: Content Leader (piece director)"
+    },
     "BO_CONTENT_CREATOR": {
       "context": ["content-creator.md"],
-      "description": "bee-content: content creator"
+      "description": "bee-content L3: Worker (content creation)"
     },
     "BO_CONTENT_REVIEWER": {
       "context": ["content-reviewer.md"],
-      "description": "bee-content: content reviewer"
+      "description": "bee-content L3: Worker (content review)"
+    },
+    "BO_CONTENT_RESEARCHER": {
+      "context": ["content-researcher.md"],
+      "description": "bee-content L3: Worker (research)"
     }
   },
   "roles": {
@@ -92,17 +104,35 @@
       "max_turns": 15,
       "description": "beeops: test audit"
     },
+    "content-queen": {
+      "env_var": "BO_CONTENT_QUEEN",
+      "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
+      "max_turns": 80,
+      "description": "bee-content: orchestrates all content creation tasks"
+    },
+    "content-leader": {
+      "env_var": "BO_CONTENT_LEADER",
+      "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
+      "max_turns": 50,
+      "description": "bee-content: directs a single piece of content"
+    },
     "content-creator": {
       "env_var": "BO_CONTENT_CREATOR",
-      "allowed_tools": "Read,Write,Edit,Bash,Glob,Grep",
+      "allowed_tools": "Read Write Edit Bash Glob Grep",
       "max_turns": 30,
-      "description": "bee-content: content creation"
+      "description": "bee-content: content creation worker"
     },
     "content-reviewer": {
       "env_var": "BO_CONTENT_REVIEWER",
-      "allowed_tools": "Read,Bash,Glob,Grep",
+      "allowed_tools": "Read Bash Glob Grep",
       "max_turns": 20,
-      "description": "bee-content: content review"
+      "description": "bee-content: content review worker"
+    },
+    "content-researcher": {
+      "env_var": "BO_CONTENT_RESEARCHER",
+      "allowed_tools": "Read Bash Glob Grep WebSearch WebFetch",
+      "max_turns": 20,
+      "description": "bee-content: research and information gathering worker"
     }
   },
   "default_context": "default.md"

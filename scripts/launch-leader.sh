@@ -34,6 +34,7 @@ case "$ROLE" in
     ROLE_ICON="👑"
     MAX_TURNS=80
     ALLOWED_TOOLS="Read,Write,Edit,Bash,Glob,Grep,Skill"
+    QUEEN_SIGNAL="queen-wake"
     ;;
   review-leader)
     ROLE_SHORT="review-leader"
@@ -43,9 +44,21 @@ case "$ROLE" in
     ROLE_ICON="🔮"
     MAX_TURNS=40
     ALLOWED_TOOLS="Read,Grep,Glob,Bash,Skill"
+    QUEEN_SIGNAL="queen-wake"
+    ;;
+  content-leader)
+    SESSION="bee-content"
+    ROLE_SHORT="content-leader"
+    ENV_VAR="BO_CONTENT_LEADER"
+    WINDOW_NAME="piece-${ISSUE}"
+    BORDER_FG="yellow"
+    ROLE_ICON="📝"
+    MAX_TURNS=50
+    ALLOWED_TOOLS="Read,Write,Edit,Bash,Glob,Grep,Skill"
+    QUEEN_SIGNAL="content-queen-${ISSUE%-*}-wake"
     ;;
   *)
-    echo "Unknown role: $ROLE (expected: leader | review-leader)" >&2
+    echo "Unknown role: $ROLE (expected: leader | review-leader | content-leader)" >&2
     exit 1
     ;;
 esac
@@ -87,9 +100,19 @@ fi
 # ── Write prompt file ──
 PROMPT_FILE="$PROMPTS_DIR/${ROLE_SHORT}-${ISSUE}.md"
 
+# For content-leader: use task-specific paths
+if [ "$ROLE" = "content-leader" ]; then
+  CONTENT_TASK_ID="${ISSUE%-*}"
+  CONTENT_PIECE_SEQ="${ISSUE##*-}"
+  CONTENT_TASK_DIR="$REPO_DIR/.beeops/tasks/content/$CONTENT_TASK_ID"
+  mkdir -p "$CONTENT_TASK_DIR/prompts" "$CONTENT_TASK_DIR/reports" "$CONTENT_TASK_DIR/pieces"
+  # Queen writes the prompt here; use it as PROMPT_FILE
+  PROMPT_FILE="$CONTENT_TASK_DIR/prompts/leader-${ISSUE}.md"
+fi
+
 # Use fix prompt if it exists (written by Queen)
 FIX_PROMPT="$PROMPTS_DIR/fix-${ROLE_SHORT}-${ISSUE}.md"
-if [ "$FIX_MODE" = "fix" ] && [ -f "$FIX_PROMPT" ]; then
+if [ "$FIX_MODE" = "fix" ] && [ "$ROLE" != "content-leader" ] && [ -f "$FIX_PROMPT" ]; then
   cp "$FIX_PROMPT" "$PROMPT_FILE"
   rm "$FIX_PROMPT"
 else
@@ -140,6 +163,30 @@ design_decisions:
 - Have the final worker-coder create the PR
 - Handle errors on your own
 PROMPT_EOF
+    ;;
+
+  content-leader)
+    # Queen writes this file before calling launch-leader.sh.
+    # Generate a default only if Queen has not written it yet.
+    if [ ! -f "$PROMPT_FILE" ]; then
+      cat > "$PROMPT_FILE" <<PROMPT_EOF
+You are a Content Leader agent (bee-content L2).
+Your job: direct the creation of piece ${ISSUE}.
+
+## Work Environment
+- Task ID: ${CONTENT_TASK_ID}
+- Piece ID: ${ISSUE}
+- Piece sequence: ${CONTENT_PIECE_SEQ}
+- Task directory: ${CONTENT_TASK_DIR}
+- Piece file: ${CONTENT_TASK_DIR}/pieces/piece-${CONTENT_PIECE_SEQ}.md
+- Reports directory: ${CONTENT_TASK_DIR}/reports/
+- Prompts directory: ${CONTENT_TASK_DIR}/prompts/
+- BO_SCRIPTS_DIR: ${BO_SCRIPTS_DIR:-}
+
+Read instruction.txt, criteria.txt, threshold.txt from the task directory.
+Follow your Content Leader context for the full procedure.
+PROMPT_EOF
+    fi
     ;;
 
   review-leader)
@@ -215,6 +262,7 @@ BRANCH="${BRANCH}"
 WORKTREE_PATH="${WORKTREE_PATH}"
 MAX_TURNS="${MAX_TURNS}"
 ALLOWED_TOOLS="${ALLOWED_TOOLS}"
+QUEEN_SIGNAL="${QUEEN_SIGNAL}"
 BO_SCRIPTS_DIR="${BO_SCRIPTS_DIR:-}"
 BO_CONTEXTS_DIR="${BO_CONTEXTS_DIR:-}"
 
@@ -256,7 +304,7 @@ fi
 tmux set-option -p pane-border-style "fg=colour240" 2>/dev/null || true
 
 # Signal Queen
-tmux wait-for -S queen-wake 2>/dev/null || true
+tmux wait-for -S \$QUEEN_SIGNAL 2>/dev/null || true
 
 # Note: worktree is intentionally kept alive after Leader completion.
 # The branch is needed for PR review cycles and CI checks.
