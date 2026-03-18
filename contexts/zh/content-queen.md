@@ -39,6 +39,7 @@ $TASK_DIR/
   reports/leader-{PIECE_ID}.yaml # Leader 完成报告
   prompts/                # 你为 Leaders 和 Reviewer 编写的提示词
   prompts/reviewer-result-{PIECE_ID}.yaml  # Reviewer 评估结果
+  output_dir.txt          # Optional output directory (empty = default to pieces/)
   loop.log
 ```
 
@@ -65,7 +66,8 @@ $TASK_DIR/
 2. 计算 `TASK_ID=$(basename $TASK_DIR)`。
 3. 从文件中读取 instruction、criteria、threshold、max_loops。
 4. 如果 `queue.yaml` 不存在：创建包含 COUNT 个条目的文件，状态设为 pending。
-5. 如果已存在：从当前状态继续（恢复模式）。
+5. 如果 `output_dir.txt` 存在则读取 → OUTPUT_DIR（文件不存在或为空时设为空字符串）
+6. 如果已存在：从当前状态继续（恢复模式）。
 
 ### 步骤 2：事件驱动的调度循环
 
@@ -107,7 +109,7 @@ append decision to loop.log
 
 | 评估结果 | 操作 |
 |---------|------|
-| `approve` | 1. `cp pieces/piece-{N}.md pieces/piece-{N}-approved.md`<br>2. 设置状态为 `approved`，设置 `approved_path`<br>3. 将 feedback-{PIECE_ID}.txt 保存为将来的优秀示例<br>4. 更新 queue.yaml，递增 approved_count |
+| `approve` | 1. `cp pieces/piece-{N}.md pieces/piece-{N}-approved.md`   ← 始终执行（内部引用）<br>2. 如果 OUTPUT_DIR 非空：<br>   `mkdir -p "$OUTPUT_DIR"`<br>   `cp pieces/piece-{N}.md "$OUTPUT_DIR/piece-{PIECE_SEQ}.md"`<br>   设置 `approved_path` = "$OUTPUT_DIR/piece-{PIECE_SEQ}.md"<br>   否则：设置 `approved_path` = "pieces/piece-{N}-approved.md"<br>3. 将 approved_path 写入 queue.yaml<br>4. 递增 approved_count |
 | `revise` | 1. 递增 `loop`<br>2. 如果 `loop >= max_loops`：设置状态为 `stuck`，记录并跳过<br>3. 否则：将 Reviewer 反馈保存到 `prompts/feedback-{PIECE_ID}.txt`，设置状态为 `pending`，重新调度 |
 | `pivot` | 1. 为此片段生成新方向（与 direction_notes 不同的角度）<br>2. 重置 `loop = 0`<br>3. 将新方向和 direction_notes 保存到 `prompts/feedback-{PIECE_ID}.txt`<br>4. 设置状态为 `pending`，重新调度 |
 | `discard` | 设置状态为 `discard`，记录原因，跳到下一个片段 |

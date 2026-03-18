@@ -14,6 +14,7 @@ Parse `$ARGUMENTS` first, then interactively ask for any missing values before l
 - **--max-loops N**: maximum revision loops per piece (integer)
 - **--count N**: number of pieces to generate (integer)
 - **--name <name>**: session name for this task
+- **--output <dir>**: output directory for approved pieces
 
 #### 0b. Ask for missing values (always ask interactively — do NOT use defaults silently)
 
@@ -65,6 +66,7 @@ Ready to start bee-content:
   threshold:   {THRESHOLD}/100
   max_loops:   {MAX_LOOPS}
   count:       {COUNT}
+  output:      {OUTPUT_DIR if set, else "(default: .beeops/tasks/content/{TASK_ID}/pieces/)"}
 
 Start? (Y/n)
 ```
@@ -91,6 +93,10 @@ echo "$INSTRUCTION" > "$TASK_DIR/instruction.txt"
 echo "$CRITERIA"    > "$TASK_DIR/criteria.txt"
 echo "$THRESHOLD"   > "$TASK_DIR/threshold.txt"
 echo "$MAX_LOOPS"   > "$TASK_DIR/max_loops.txt"
+echo "$OUTPUT_DIR" > "$TASK_DIR/output_dir.txt"
+if [ -n "$OUTPUT_DIR" ]; then
+  mkdir -p "$OUTPUT_DIR"
+fi
 # queue.yaml will be initialized by Content Queen
 ```
 
@@ -139,7 +145,7 @@ tmux set-option -p -t "$SESSION:content-queen.0" pane-border-style "fg=yellow" 2
 ### Step 5: Send initial instruction to Content Queen
 
 ```bash
-INSTRUCTION_MSG="Content task ready. TASK_DIR: $TASK_DIR COUNT: $COUNT BO_SCRIPTS_DIR: $BO_SCRIPTS_DIR. Read instruction.txt, initialize queue.yaml, and begin."
+INSTRUCTION_MSG="Content task ready. TASK_DIR: $TASK_DIR COUNT: $COUNT BO_SCRIPTS_DIR: $BO_SCRIPTS_DIR OUTPUT_DIR: ${OUTPUT_DIR:-}. Read instruction.txt, initialize queue.yaml, and begin."
 tmux send-keys -t "$SESSION:content-queen" "$INSTRUCTION_MSG" Enter
 ```
 
@@ -172,7 +178,7 @@ bee-content started.
   count:     {COUNT}
   threshold: {THRESHOLD}/100
   max_loops: {MAX_LOOPS}
-  output:    .beeops/tasks/content/{TASK_ID}/pieces/
+  output:    {OUTPUT_DIR if set, else .beeops/tasks/content/{TASK_ID}/pieces/}
 
   Monitor: tmux attach -t bee-content
   Stop:    tmux kill-session -t bee-content
@@ -183,6 +189,6 @@ bee-content started.
 - `$ARGUMENTS` contains the slash command arguments
 - This command must be run in the **target project directory**
 - Content Queen manages queue.yaml and dispatches Content Leaders for each piece
-- Approved pieces: `.beeops/tasks/content/{TASK_ID}/pieces/piece-{N}-approved.md`
+- Approved pieces: `.beeops/tasks/content/{TASK_ID}/pieces/piece-{N}-approved.md` (also copied to `--output <dir>` if specified)
 - Loop log: `.beeops/tasks/content/{TASK_ID}/loop.log`
 - 3-layer flow: Content Queen → Content Leader → Workers (Creator, Reviewer, Researcher)

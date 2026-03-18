@@ -14,6 +14,7 @@
 - **--max-loops N**：每篇内容的最大修订循环次数（整数）
 - **--count N**：要生成的内容篇数（整数）
 - **--name <name>**：本次任务的会话名称
+- **--output <dir>**：已审批内容的输出目录
 
 #### 0b. 询问缺失的值（务必交互式询问——不得静默使用默认值）
 
@@ -65,6 +66,7 @@
   threshold:   {THRESHOLD}/100
   max_loops:   {MAX_LOOPS}
   count:       {COUNT}
+  output:      {OUTPUT_DIR 若已设置则显示其值，否则显示"(默认: .beeops/tasks/content/{TASK_ID}/pieces/)"}
 
 是否开始？（Y/n）
 ```
@@ -91,6 +93,10 @@ echo "$INSTRUCTION" > "$TASK_DIR/instruction.txt"
 echo "$CRITERIA"    > "$TASK_DIR/criteria.txt"
 echo "$THRESHOLD"   > "$TASK_DIR/threshold.txt"
 echo "$MAX_LOOPS"   > "$TASK_DIR/max_loops.txt"
+echo "$OUTPUT_DIR" > "$TASK_DIR/output_dir.txt"
+if [ -n "$OUTPUT_DIR" ]; then
+  mkdir -p "$OUTPUT_DIR"
+fi
 # queue.yaml will be initialized by Content Queen
 ```
 
@@ -139,7 +145,7 @@ tmux set-option -p -t "$SESSION:content-queen.0" pane-border-style "fg=yellow" 2
 ### 步骤 5：向 Content Queen 发送初始指令
 
 ```bash
-INSTRUCTION_MSG="Content task ready. TASK_DIR: $TASK_DIR COUNT: $COUNT BO_SCRIPTS_DIR: $BO_SCRIPTS_DIR. Read instruction.txt, initialize queue.yaml, and begin."
+INSTRUCTION_MSG="Content task ready. TASK_DIR: $TASK_DIR COUNT: $COUNT BO_SCRIPTS_DIR: $BO_SCRIPTS_DIR OUTPUT_DIR: ${OUTPUT_DIR:-}. Read instruction.txt, initialize queue.yaml, and begin."
 tmux send-keys -t "$SESSION:content-queen" "$INSTRUCTION_MSG" Enter
 ```
 
@@ -172,7 +178,7 @@ bee-content started.
   count:     {COUNT}
   threshold: {THRESHOLD}/100
   max_loops: {MAX_LOOPS}
-  output:    .beeops/tasks/content/{TASK_ID}/pieces/
+  output:    {OUTPUT_DIR 若已设置则显示其值，否则显示 .beeops/tasks/content/{TASK_ID}/pieces/}
 
   Monitor: tmux attach -t bee-content
   Stop:    tmux kill-session -t bee-content
@@ -183,6 +189,6 @@ bee-content started.
 - `$ARGUMENTS` 包含斜杠命令的参数
 - 此命令必须在**目标项目目录**中运行
 - Content Queen 负责管理 queue.yaml，并为每篇内容调度 Content Leader
-- 已审批的内容：`.beeops/tasks/content/{TASK_ID}/pieces/piece-{N}-approved.md`
+- 已审批的内容：`.beeops/tasks/content/{TASK_ID}/pieces/piece-{N}-approved.md`（若指定了 `--output <dir>`，内容也会复制到该目录）
 - 循环日志：`.beeops/tasks/content/{TASK_ID}/loop.log`
 - 三层流程：Content Queen → Content Leader → Workers（Creator、Reviewer、Researcher）

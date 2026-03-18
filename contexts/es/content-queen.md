@@ -39,6 +39,7 @@ $TASK_DIR/
   reports/leader-{PIECE_ID}.yaml # Informes de finalización del Leader
   prompts/                # Prompts que escribes para Leaders y Reviewer
   prompts/reviewer-result-{PIECE_ID}.yaml  # Resultados de evaluación del Reviewer
+  output_dir.txt          # Optional output directory (empty = default to pieces/)
   loop.log
 ```
 
@@ -65,7 +66,8 @@ Inicializa con COUNT entradas, todas con `status: pending`:
 2. Calcula `TASK_ID=$(basename $TASK_DIR)`.
 3. Lee instruction, criteria, threshold y max_loops desde los archivos.
 4. Si `queue.yaml` no existe: créalo con COUNT entradas con status: pending.
-5. Si ya existe: continúa desde el estado actual (modo de reanudación).
+5. Lee `output_dir.txt` si existe → OUTPUT_DIR (cadena vacía si el archivo no existe o está vacío)
+6. Si ya existe: continúa desde el estado actual (modo de reanudación).
 
 ### Paso 2: Bucle de Despacho Orientado a Eventos
 
@@ -107,7 +109,7 @@ agrega la decisión a loop.log
 
 | Evaluación | Acción |
 |-----------|--------|
-| `approve` | 1. `cp pieces/piece-{N}.md pieces/piece-{N}-approved.md`<br>2. Establece status: `approved`, establece `approved_path`<br>3. Guarda feedback-{PIECE_ID}.txt para futuros buenos ejemplos<br>4. Actualiza queue.yaml, incrementa approved_count |
+| `approve` | 1. `cp pieces/piece-{N}.md pieces/piece-{N}-approved.md`   ← siempre (referencia interna)<br>2. Si OUTPUT_DIR no está vacío:<br>   `mkdir -p "$OUTPUT_DIR"`<br>   `cp pieces/piece-{N}.md "$OUTPUT_DIR/piece-{PIECE_SEQ}.md"`<br>   establece `approved_path` = "$OUTPUT_DIR/piece-{PIECE_SEQ}.md"<br>   Si no: establece `approved_path` = "pieces/piece-{N}-approved.md"<br>3. Actualiza queue.yaml con approved_path<br>4. Incrementa approved_count |
 | `revise` | 1. Incrementa `loop`<br>2. Si `loop >= max_loops`: establece status: `stuck`, registra y omite<br>3. Si no: guarda el feedback del Reviewer en `prompts/feedback-{PIECE_ID}.txt`, establece status: `pending`, re-despacha |
 | `pivot` | 1. Genera una nueva dirección para esta pieza (ángulo diferente a direction_notes)<br>2. Reinicia `loop = 0`<br>3. Guarda la nueva dirección y direction_notes en `prompts/feedback-{PIECE_ID}.txt`<br>4. Establece status: `pending`, re-despacha |
 | `discard` | Establece status: `discard`, registra el motivo, pasa a la siguiente pieza |

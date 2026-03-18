@@ -14,6 +14,7 @@
 - **--max-loops N**: 1件あたりの最大改訂ループ数（整数）
 - **--count N**: 生成するコンテンツ件数（整数）
 - **--name <name>**: このタスクのセッション名
+- **--output <dir>**: 承認済みコンテンツの出力ディレクトリ
 
 #### 0b. 不足している値を対話形式で確認（デフォルトを黙って使わず、必ず聞く）
 
@@ -65,6 +66,7 @@ bee-content を開始します：
   採用閾値:   {THRESHOLD}/100
   最大ループ: {MAX_LOOPS}回
   生成件数:   {COUNT}件
+  output:      {OUTPUT_DIRが設定されている場合はその値、未設定の場合は"(デフォルト: .beeops/tasks/content/{TASK_ID}/pieces/)"}
 
 開始しますか？ (Y/n)
 ```
@@ -91,6 +93,10 @@ echo "$INSTRUCTION" > "$TASK_DIR/instruction.txt"
 echo "$CRITERIA"    > "$TASK_DIR/criteria.txt"
 echo "$THRESHOLD"   > "$TASK_DIR/threshold.txt"
 echo "$MAX_LOOPS"   > "$TASK_DIR/max_loops.txt"
+echo "$OUTPUT_DIR" > "$TASK_DIR/output_dir.txt"
+if [ -n "$OUTPUT_DIR" ]; then
+  mkdir -p "$OUTPUT_DIR"
+fi
 # queue.yamlはContent Queenが初期化する
 ```
 
@@ -139,7 +145,7 @@ tmux set-option -p -t "$SESSION:content-queen.0" pane-border-style "fg=yellow" 2
 ### ステップ5：Content Queenに初期指示を送信
 
 ```bash
-INSTRUCTION_MSG="Content task ready. TASK_DIR: $TASK_DIR COUNT: $COUNT BO_SCRIPTS_DIR: $BO_SCRIPTS_DIR. Read instruction.txt, initialize queue.yaml, and begin."
+INSTRUCTION_MSG="Content task ready. TASK_DIR: $TASK_DIR COUNT: $COUNT BO_SCRIPTS_DIR: $BO_SCRIPTS_DIR OUTPUT_DIR: ${OUTPUT_DIR:-}. Read instruction.txt, initialize queue.yaml, and begin."
 tmux send-keys -t "$SESSION:content-queen" "$INSTRUCTION_MSG" Enter
 ```
 
@@ -172,7 +178,7 @@ bee-content を開始しました。
   count:     {COUNT}件
   threshold: {THRESHOLD}/100
   max_loops: {MAX_LOOPS}回
-  output:    .beeops/tasks/content/{TASK_ID}/pieces/
+  output:    {OUTPUT_DIRが設定されている場合はその値、未設定の場合は .beeops/tasks/content/{TASK_ID}/pieces/}
 
   モニター: tmux attach -t bee-content
   停止:     tmux kill-session -t bee-content
@@ -183,6 +189,6 @@ bee-content を開始しました。
 - `$ARGUMENTS` はスラッシュコマンドの引数を含みます
 - このコマンドは**対象プロジェクトディレクトリ**で実行する必要があります
 - Content Queenがqueue.yamlを管理し、各コンテンツ件のContent Leaderを起動します
-- 承認済みコンテンツ: `.beeops/tasks/content/{TASK_ID}/pieces/piece-{N}-approved.md`
+- 承認済みコンテンツ: `.beeops/tasks/content/{TASK_ID}/pieces/piece-{N}-approved.md`（`--output <dir>` が指定されている場合はそのディレクトリにもコピーされます）
 - ループログ: `.beeops/tasks/content/{TASK_ID}/loop.log`
 - 3層構造: Content Queen → Content Leader → Worker（Creator・Reviewer・Researcher）

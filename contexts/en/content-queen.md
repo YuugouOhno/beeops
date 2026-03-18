@@ -39,6 +39,7 @@ $TASK_DIR/
   reports/leader-{PIECE_ID}.yaml # Leader completion reports
   prompts/                # Prompts you write for Leaders and Reviewer
   prompts/reviewer-result-{PIECE_ID}.yaml  # Reviewer assessment results
+  output_dir.txt          # Optional output directory (empty = default to pieces/)
   loop.log
 ```
 
@@ -65,7 +66,8 @@ Initialize with COUNT entries, all `status: pending`:
 2. Compute `TASK_ID=$(basename $TASK_DIR)`.
 3. Read instruction, criteria, threshold, max_loops from files.
 4. If `queue.yaml` does not exist: create it with COUNT entries, status: pending.
-5. If it already exists: continue from current state (resume mode).
+5. Read `output_dir.txt` if it exists → OUTPUT_DIR (empty string if file missing or empty)
+6. If it already exists: continue from current state (resume mode).
 
 ### Step 2: Event-Driven Dispatch Loop
 
@@ -107,7 +109,7 @@ append decision to loop.log
 
 | Assessment | Action |
 |-----------|--------|
-| `approve` | 1. `cp pieces/piece-{N}.md pieces/piece-{N}-approved.md`<br>2. Set status: `approved`, set `approved_path`<br>3. Save feedback-{PIECE_ID}.txt for future good examples<br>4. Update queue.yaml, increment approved_count |
+| `approve` | 1. `cp pieces/piece-{N}.md pieces/piece-{N}-approved.md`   ← always (internal reference)<br>2. If OUTPUT_DIR is non-empty:<br>   `mkdir -p "$OUTPUT_DIR"`<br>   `cp pieces/piece-{N}.md "$OUTPUT_DIR/piece-{PIECE_SEQ}.md"`<br>   set `approved_path` = "$OUTPUT_DIR/piece-{PIECE_SEQ}.md"<br>   Else: set `approved_path` = "pieces/piece-{N}-approved.md"<br>3. Update queue.yaml with approved_path<br>4. Increment approved_count |
 | `revise` | 1. Increment `loop`<br>2. If `loop >= max_loops`: set status: `stuck`, log and skip<br>3. Else: save reviewer feedback to `prompts/feedback-{PIECE_ID}.txt`, set status: `pending`, re-dispatch |
 | `pivot` | 1. Generate a new direction for this piece (different angle from direction_notes)<br>2. Reset `loop = 0`<br>3. Save new direction + direction_notes to `prompts/feedback-{PIECE_ID}.txt`<br>4. Set status: `pending`, re-dispatch |
 | `discard` | Set status: `discard`, log reason, move to next |

@@ -14,6 +14,7 @@ Analizar `$ARGUMENTS` primero, luego preguntar de forma interactiva por los valo
 - **--max-loops N**: bucles máximos de revisión por pieza (entero)
 - **--count N**: número de piezas a generar (entero)
 - **--name <name>**: nombre de sesión para esta tarea
+- **--output <dir>**: directorio de salida para las piezas aprobadas
 
 #### 0b. Preguntar por los valores faltantes (preguntar siempre de forma interactiva — NO usar valores predeterminados en silencio)
 
@@ -65,6 +66,7 @@ Ready to start bee-content:
   threshold:   {THRESHOLD}/100
   max_loops:   {MAX_LOOPS}
   count:       {COUNT}
+  output:      {OUTPUT_DIR si está definido, si no "(default: .beeops/tasks/content/{TASK_ID}/pieces/)"}
 
 Start? (Y/n)
 ```
@@ -91,6 +93,10 @@ echo "$INSTRUCTION" > "$TASK_DIR/instruction.txt"
 echo "$CRITERIA"    > "$TASK_DIR/criteria.txt"
 echo "$THRESHOLD"   > "$TASK_DIR/threshold.txt"
 echo "$MAX_LOOPS"   > "$TASK_DIR/max_loops.txt"
+echo "$OUTPUT_DIR" > "$TASK_DIR/output_dir.txt"
+if [ -n "$OUTPUT_DIR" ]; then
+  mkdir -p "$OUTPUT_DIR"
+fi
 # queue.yaml will be initialized by Content Queen
 ```
 
@@ -139,7 +145,7 @@ tmux set-option -p -t "$SESSION:content-queen.0" pane-border-style "fg=yellow" 2
 ### Paso 5: Enviar instrucción inicial a Content Queen
 
 ```bash
-INSTRUCTION_MSG="Content task ready. TASK_DIR: $TASK_DIR COUNT: $COUNT BO_SCRIPTS_DIR: $BO_SCRIPTS_DIR. Read instruction.txt, initialize queue.yaml, and begin."
+INSTRUCTION_MSG="Content task ready. TASK_DIR: $TASK_DIR COUNT: $COUNT BO_SCRIPTS_DIR: $BO_SCRIPTS_DIR OUTPUT_DIR: ${OUTPUT_DIR:-}. Read instruction.txt, initialize queue.yaml, and begin."
 tmux send-keys -t "$SESSION:content-queen" "$INSTRUCTION_MSG" Enter
 ```
 
@@ -172,7 +178,7 @@ bee-content started.
   count:     {COUNT}
   threshold: {THRESHOLD}/100
   max_loops: {MAX_LOOPS}
-  output:    .beeops/tasks/content/{TASK_ID}/pieces/
+  output:    {OUTPUT_DIR si está definido, si no .beeops/tasks/content/{TASK_ID}/pieces/}
 
   Monitor: tmux attach -t bee-content
   Stop:    tmux kill-session -t bee-content
@@ -183,6 +189,6 @@ bee-content started.
 - `$ARGUMENTS` contiene los argumentos del comando slash
 - Este comando debe ejecutarse en el **directorio del proyecto de destino**
 - La Content Queen gestiona queue.yaml y despacha Content Leaders para cada pieza
-- Piezas aprobadas: `.beeops/tasks/content/{TASK_ID}/pieces/piece-{N}-approved.md`
+- Piezas aprobadas: `.beeops/tasks/content/{TASK_ID}/pieces/piece-{N}-approved.md` (también copiadas a `--output <dir>` si se especifica)
 - Registro de bucles: `.beeops/tasks/content/{TASK_ID}/loop.log`
 - Flujo de 3 capas: Content Queen → Content Leader → Workers (Creator, Reviewer, Researcher)

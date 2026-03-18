@@ -39,6 +39,7 @@ $TASK_DIR/
   reports/leader-{PIECE_ID}.yaml # Leader完了レポート
   prompts/                # Leader・Reviewer向けプロンプト
   prompts/reviewer-result-{PIECE_ID}.yaml  # Reviewer評価結果
+  output_dir.txt          # Optional output directory (empty = default to pieces/)
   loop.log
 ```
 
@@ -65,7 +66,8 @@ COUNT件のエントリを `status: pending` で初期化:
 2. `TASK_ID=$(basename $TASK_DIR)` を計算。
 3. ファイルからinstruction、criteria、threshold、max_loopsを読む。
 4. `queue.yaml` が存在しない場合: COUNT件のエントリをstatus: pendingで作成。
-5. 既存の場合: 現状から継続（再開モード）。
+5. `output_dir.txt` が存在すれば読み込む → OUTPUT_DIR（ファイルが存在しないか空の場合は空文字列）
+6. 既存の場合: 現状から継続（再開モード）。
 
 ### ステップ2：イベント駆動ディスパッチループ
 
@@ -107,7 +109,7 @@ loop.log に決定内容を追記
 
 | Assessment | アクション |
 |-----------|-----------|
-| `approve` | 1. `cp pieces/piece-{N}.md pieces/piece-{N}-approved.md`<br>2. status: `approved`、approved_path設定<br>3. feedback-{PIECE_ID}.txt を将来の良い例として保存<br>4. queue.yaml更新、approved_countインクリメント |
+| `approve` | 1. `cp pieces/piece-{N}.md pieces/piece-{N}-approved.md`   ← 常に実行（内部参照用）<br>2. OUTPUT_DIRが空でない場合:<br>   `mkdir -p "$OUTPUT_DIR"`<br>   `cp pieces/piece-{N}.md "$OUTPUT_DIR/piece-{PIECE_SEQ}.md"`<br>   `approved_path` = "$OUTPUT_DIR/piece-{PIECE_SEQ}.md" に設定<br>   そうでない場合: `approved_path` = "pieces/piece-{N}-approved.md" に設定<br>3. approved_path を含めてqueue.yamlを更新<br>4. approved_countをインクリメント |
 | `revise` | 1. `loop` インクリメント<br>2. `loop >= max_loops` の場合: status: `stuck`、ログして次へ<br>3. そうでない場合: Reviewerフィードバックを `prompts/feedback-{PIECE_ID}.txt` に保存、status: `pending`、再ディスパッチ |
 | `pivot` | 1. このピースの新しいdirectionを生成（direction_notesとは異なる角度）<br>2. `loop = 0` にリセット<br>3. 新しいdirectionとdirection_notesを `prompts/feedback-{PIECE_ID}.txt` に保存<br>4. status: `pending`、再ディスパッチ |
 | `discard` | status: `discard`、理由をログ、次の件へ |
