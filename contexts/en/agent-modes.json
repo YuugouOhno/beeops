@@ -39,6 +39,14 @@
       "context": ["reviewer-base.md", "test-auditor.md"],
 
       "description": "beeops L3: Worker (test audit)"
+    },
+    "BO_CONTENT_CREATOR": {
+      "context": ["content-creator.md"],
+      "description": "bee-content: content creator"
+    },
+    "BO_CONTENT_REVIEWER": {
+      "context": ["content-reviewer.md"],
+      "description": "bee-content: content reviewer"
     }
   },
   "roles": {
@@ -83,6 +91,18 @@
       "allowed_tools": "Read Grep Glob Bash Skill",
       "max_turns": 15,
       "description": "beeops: test audit"
+    },
+    "content-creator": {
+      "env_var": "BO_CONTENT_CREATOR",
+      "allowed_tools": "Read,Write,Edit,Bash,Glob,Grep",
+      "max_turns": 30,
+      "description": "bee-content: content creation"
+    },
+    "content-reviewer": {
+      "env_var": "BO_CONTENT_REVIEWER",
+      "allowed_tools": "Read,Bash,Glob,Grep",
+      "max_turns": 20,
+      "description": "bee-content: content review"
     }
   },
   "default_context": "default.md"

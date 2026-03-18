@@ -135,6 +135,8 @@ queued → dispatched → leader_working → review_dispatched → reviewing →
 review_dispatched → reviewing → done
                                   │
               fixing ←── fix_required
+
+※ CI 確認は Leader が PR 作成後に実行するため、Queen の ci_checking フェーズは不要
 ```
 
 | ステータス | 意味 |
@@ -147,7 +149,6 @@ review_dispatched → reviewing → done
 | reviewing | Review Leader 作業中 |
 | fix_required | レビュー指摘あり |
 | fixing | Leader 修正中 |
-| ci_checking | CI 確認中 |
 | done | 完了 |
 | stuck | 3回修正しても通らない（ユーザー介入待ち） |
 | error | 異常終了 |
@@ -158,7 +159,7 @@ review_dispatched → reviewing → done
 2. `blocked_reason` があるタスクはスキップ（ログに「スキップ: {理由}」を記録）
 3. 優先度順: high → medium → low
 4. 同一優先度内では Issue 番号が小さい方を先に
-5. 並列実行の最大数: `.claude/beeops/settings.json` の `max_parallel_leaders` を読む（未設定時はデフォルト 2）
+5. 並列実行の最大数: `.beeops/settings.json` の `max_parallel_leaders` を読む（未設定時はデフォルト 2）
 
 ## queue.yaml の更新ルール
 
@@ -191,7 +192,7 @@ review_window: "review-42"      # review window 名
 1. **Skill: `bo-dispatch`** を発動し、Leader（または PR 既存なら Review Leader）を起動
 2. bo-dispatch が返す結果（レポート内容）に基づいて判定:
    - Leader completed → `review_dispatched` に更新 → Review Leader 起動（再度 bo-dispatch）
-   - Review Leader approve → `ci_checking` → CI 確認
+   - Review Leader approve → `done`
    - Review Leader fix_required → review_count < 3 なら `fixing` → Leader 再起動（fix mode、既存ブランチを再利用）
    - 失敗 → `error` に更新
 

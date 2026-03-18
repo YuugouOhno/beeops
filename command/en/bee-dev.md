@@ -14,12 +14,12 @@ BO_CONTEXTS_DIR="$PKG_DIR/contexts"
 ### Step 1: Check for existing session
 
 ```bash
-SESSION="bo"
+SESSION="bee-dev"
 
 tmux has-session -t "$SESSION" 2>/dev/null && {
   echo "An existing bo session was found."
-  echo "  tmux attach -t bo   # monitor"
-  echo "  tmux kill-session -t bo  # stop and restart"
+  echo "  tmux attach -t bee-dev   # monitor"
+  echo "  tmux kill-session -t bee-dev  # stop and restart"
   # Stop here. Let the user decide.
 }
 ```
@@ -60,12 +60,12 @@ case "$(uname -s)" in
     osascript -e '
     tell application "Terminal"
       activate
-      do script "tmux attach -t bo"
+      do script "tmux attach -t bee-dev"
     end tell
-    ' 2>/dev/null || echo "Open a new terminal and run: tmux attach -t bo"
+    ' 2>/dev/null || echo "Open a new terminal and run: tmux attach -t bee-dev"
     ;;
   *)
-    echo "Queen session started. Attach with: tmux attach -t bo"
+    echo "Queen session started. Attach with: tmux attach -t bee-dev"
     ;;
 esac
 ```
@@ -91,7 +91,7 @@ Polls for up to 120 seconds. Startup is complete when the `Claude Code` banner a
 Determine what instruction to send to the Queen. Priority order:
 
 1. **`$ARGUMENTS` provided** → use it directly, skip settings/interactive
-2. **Settings file exists** (`.claude/beeops/settings.json`) → build instruction from settings
+2. **Settings file exists** (`.beeops/settings.json`) → build instruction from settings
 3. **No arguments and no settings** → ask the user interactively
 
 #### 5a. If `$ARGUMENTS` is non-empty
@@ -107,7 +107,7 @@ fi
 #### 5b. If no arguments, check for settings file
 
 ```bash
-SETTINGS_FILE=".claude/beeops/settings.json"
+SETTINGS_FILE=".beeops/settings.json"
 if [ -z "$ARGUMENTS" ] && [ -f "$SETTINGS_FILE" ]; then
   echo "Found settings: $SETTINGS_FILE"
   cat "$SETTINGS_FILE"
@@ -153,7 +153,7 @@ Optionally, after the mode is selected, ask:
 ```
 Save this as default settings? (y/n)
 ```
-If yes, write the corresponding `.claude/beeops/settings.json` file so the next run uses it automatically.
+If yes, write the corresponding `.beeops/settings.json` file so the next run uses it automatically.
 
 #### 5d. Send the instruction to the Queen
 
@@ -171,7 +171,7 @@ After startup, display:
 Queen started (beeops). tmux session displayed.
   queen window: main control loop
   issue-{N}/review-{N}: Leader/Worker windows are added automatically
-  tmux kill-session -t bo  # to stop
+  tmux kill-session -t bee-dev  # to stop
 ```
 
 ## Notes

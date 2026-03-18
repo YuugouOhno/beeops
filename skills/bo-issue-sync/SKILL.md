@@ -5,7 +5,7 @@ description: Sync GitHub Issues to queue.yaml. Detects new issues, analyzes depe
 
 # bo-issue-sync: Issue → queue.yaml Sync
 
-Fetches open Issues from GitHub and syncs them to `.claude/tasks/queue.yaml`.
+Fetches open Issues from GitHub and syncs them to `.beeops/tasks/queue.yaml`.
 Handles adding new Issues, marking closed Issues as done, dependency analysis, and priority assignment in one operation.
 
 ## Procedure
@@ -44,7 +44,7 @@ Store the results (PR URL + branch name) for use in Step 4.
 
 ### 3. Load queue.yaml
 
-If `.claude/tasks/queue.yaml` exists, read it. Otherwise initialize:
+If `.beeops/tasks/queue.yaml` exists, read it. Otherwise initialize:
 
 ```yaml
 version: 1
@@ -117,10 +117,10 @@ Set priority for each `raw` task and update to `queued`:
 ### 7. Write queue.yaml
 
 ```bash
-mkdir -p .claude/tasks
+mkdir -p .beeops/tasks
 ```
 
-Write `.claude/tasks/queue.yaml` using the Write tool.
+Write `.beeops/tasks/queue.yaml` using the Write tool.
 
 ### 8. Display Status
 

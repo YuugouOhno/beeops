@@ -21,7 +21,7 @@
 
 ## 完了時レポート（任意だが推奨）
 
-レビュー完了時に `.claude/tasks/reports/review-{ROLE_SHORT}-{ISSUE_ID}-detail.yaml` を書き出す。
+レビュー完了時に `.beeops/tasks/reports/review-{ROLE_SHORT}-{ISSUE_ID}-detail.yaml` を書き出す。
 orchestrator がこのレポートを読んで次アクション（approve → done、fix_required → executor 再起動）を判定する。
 
 **注意**: このレポートを書かなくても、シェルラッパーが基本レポート（exit_code ベース）を自動生成するので動作は止まらない。ただし `verdict` フィールドがないと orchestrator は exit_code 0 を approve として扱うため、fix_required の伝達には詳細レポートが必要。

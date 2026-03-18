@@ -26,7 +26,7 @@ You are an executor agent. You receive a single GitHub Issue and implement it un
 
 ## Completion Report (Required)
 
-On implementation completion, write a report to `.claude/tasks/reports/exec-{ISSUE_ID}-detail.yaml`.
+On implementation completion, write a report to `.beeops/tasks/reports/exec-{ISSUE_ID}-detail.yaml`.
 The orchestrator reads only this report to determine the next action. **Write it at a granularity that allows full understanding of what was implemented just by reading this report.**
 
 ```yaml

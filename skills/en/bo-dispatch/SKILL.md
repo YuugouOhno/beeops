@@ -54,14 +54,14 @@ kill $TIMER_PID 2>/dev/null
 
 ### Post-wake determination
 
-Check `.claude/tasks/reports/`:
+Check `.beeops/tasks/reports/`:
 - **New report found** — Normal completion. Proceed to report processing.
 - **No report (timeout)** — Check window state.
 
 ### State check on timeout
 
 ```bash
-tmux list-panes -t bo:{window_name} -F '#{@agent_label} #{pane_current_command}' 2>/dev/null
+tmux list-panes -t bee-dev:{window_name} -F '#{@agent_label} #{pane_current_command}' 2>/dev/null
 ```
 
 | State | Meaning | Action |
@@ -75,7 +75,7 @@ tmux list-panes -t bo:{window_name} -F '#{@agent_label} #{pane_current_command}'
 ### Report files
 
 ```
-.claude/tasks/reports/
+.beeops/tasks/reports/
 ├── leader-{N}.yaml                      # Basic report written by launch-leader.sh (guaranteed)
 ├── leader-{N}-summary.yaml              # Detailed summary written by Leader (optional)
 ├── review-leader-{N}.yaml               # Basic report written by launch-leader.sh (guaranteed)
@@ -163,7 +163,7 @@ fix_instructions: null
 
 When the Review Leader returns fix_required:
 
-1. Write a fix prompt to: `.claude/tasks/prompts/fix-leader-{N}.md`
+1. Write a fix prompt to: `.beeops/tasks/prompts/fix-leader-{N}.md`
 2. Include review findings and fix instructions in the fix prompt
 3. Restart with `launch-leader.sh leader {N} {branch} fix` (reuses existing worktree)
 
@@ -247,10 +247,10 @@ done
 Move processed reports to `processed/` to prevent reprocessing:
 
 ```bash
-mv .claude/tasks/reports/leader-{N}.yaml .claude/tasks/reports/processed/
-mv .claude/tasks/reports/leader-{N}-summary.yaml .claude/tasks/reports/processed/ 2>/dev/null
-mv .claude/tasks/reports/review-leader-{N}*.yaml .claude/tasks/reports/processed/ 2>/dev/null
-mv .claude/tasks/reports/worker-{N}-*.yaml .claude/tasks/reports/processed/ 2>/dev/null
+mv .beeops/tasks/reports/leader-{N}.yaml .beeops/tasks/reports/processed/
+mv .beeops/tasks/reports/leader-{N}-summary.yaml .beeops/tasks/reports/processed/ 2>/dev/null
+mv .beeops/tasks/reports/review-leader-{N}*.yaml .beeops/tasks/reports/processed/ 2>/dev/null
+mv .beeops/tasks/reports/worker-{N}-*.yaml .beeops/tasks/reports/processed/ 2>/dev/null
 ```
 
 ## Cleanup
@@ -262,8 +262,8 @@ Resources have different lifecycles. Clean up each at the right time.
 After task reaches done, stuck, or error, kill the tmux windows:
 
 ```bash
-tmux kill-window -t bo:issue-{N} 2>/dev/null || true
-tmux kill-window -t bo:review-{N} 2>/dev/null || true
+tmux kill-window -t bee-dev:issue-{N} 2>/dev/null || true
+tmux kill-window -t bee-dev:review-{N} 2>/dev/null || true
 ```
 
 ### Worktrees and branches — after PR merge
@@ -277,7 +277,7 @@ Clean up only after confirming the PR is merged:
 PR_STATE=$(gh pr view {PR_number} --json state -q '.state' 2>/dev/null)
 if [ "$PR_STATE" = "MERGED" ]; then
   REPO_DIR=$(git rev-parse --show-toplevel)
-  WORKTREE_PATH="$REPO_DIR/.claude/worktrees/{branch}"
+  WORKTREE_PATH="$REPO_DIR/.beeops/worktrees/{branch}"
 
   # 1. Remove worktree
   git -C "$REPO_DIR" worktree remove --force "$WORKTREE_PATH" 2>/dev/null || true
@@ -292,7 +292,7 @@ fi
 
 ### Session-end cleanup
 
-When the Queen session ends (`tmux kill-session -t bo`), prune any stale worktree references:
+When the Queen session ends (`tmux kill-session -t bee-dev`), prune any stale worktree references:
 
 ```bash
 git worktree prune

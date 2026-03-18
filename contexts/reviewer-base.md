@@ -21,7 +21,7 @@
 
 ## Completion Report (Optional but Recommended)
 
-On review completion, write a report to `.claude/tasks/reports/review-{ROLE_SHORT}-{ISSUE_ID}-detail.yaml`.
+On review completion, write a report to `.beeops/tasks/reports/review-{ROLE_SHORT}-{ISSUE_ID}-detail.yaml`.
 The orchestrator reads this report to determine the next action (approve -> done, fix_required -> restart executor).
 
 **Note**: Even without this report, the shell wrapper auto-generates a basic report (based on exit_code) so execution continues. However, without the `verdict` field the orchestrator treats exit_code 0 as approve, so the detailed report is required to communicate fix_required.

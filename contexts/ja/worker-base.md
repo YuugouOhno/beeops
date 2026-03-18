@@ -26,7 +26,7 @@
 
 ## 完了時レポート（必須）
 
-実装完了時に `.claude/tasks/reports/exec-{ISSUE_ID}-detail.yaml` を書き出す。
+実装完了時に `.beeops/tasks/reports/exec-{ISSUE_ID}-detail.yaml` を書き出す。
 orchestrator はこのレポートだけを読んで次アクションを判定する。**これを読むだけで何が実装されたか完全に理解できる粒度**で書くこと。
 
 ```yaml

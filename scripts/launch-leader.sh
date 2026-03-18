@@ -16,11 +16,11 @@ ROLE="$1"
 ISSUE="$2"
 BRANCH="$3"
 FIX_MODE="${4:-}"
-SESSION="bo"
+SESSION="bee-dev"
 REPO_DIR="$(git rev-parse --show-toplevel)"
-REPORTS_DIR="$REPO_DIR/.claude/tasks/reports"
-PROMPTS_DIR="$REPO_DIR/.claude/tasks/prompts"
-WORKTREES_DIR="$REPO_DIR/.claude/worktrees"
+REPORTS_DIR="$REPO_DIR/.beeops/tasks/reports"
+PROMPTS_DIR="$REPO_DIR/.beeops/tasks/prompts"
+WORKTREES_DIR="$REPO_DIR/.beeops/worktrees"
 
 mkdir -p "$REPORTS_DIR/processed" "$PROMPTS_DIR" "$WORKTREES_DIR"
 
@@ -78,9 +78,9 @@ if [ "$ROLE" = "leader" ]; then
     ln -sfn "$REPO_DIR/node_modules" "$WORKTREE_PATH/node_modules" 2>/dev/null || true
     ln -sfn "$REPO_DIR/.next" "$WORKTREE_PATH/.next" 2>/dev/null || true
     # Ensure reports/prompts dirs are accessible from worktree
-    mkdir -p "$WORKTREE_PATH/.claude/tasks"
-    ln -sfn "$REPORTS_DIR" "$WORKTREE_PATH/.claude/tasks/reports"
-    ln -sfn "$PROMPTS_DIR" "$WORKTREE_PATH/.claude/tasks/prompts"
+    mkdir -p "$WORKTREE_PATH/.beeops/tasks"
+    ln -sfn "$REPORTS_DIR" "$WORKTREE_PATH/.beeops/tasks/reports"
+    ln -sfn "$PROMPTS_DIR" "$WORKTREE_PATH/.beeops/tasks/prompts"
   fi
 fi
 
@@ -226,6 +226,7 @@ env \${ENV_VAR}=1 \
   BO_SCRIPTS_DIR="\$BO_SCRIPTS_DIR" \
   BO_CONTEXTS_DIR="\$BO_CONTEXTS_DIR" \
   claude --dangerously-skip-permissions \
+  --permission-mode bypassPermissions \
   --allowedTools "\$ALLOWED_TOOLS" \
   --max-turns \$MAX_TURNS \
   "\$(cat "\$PROMPT_FILE")"

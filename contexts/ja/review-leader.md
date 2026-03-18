@@ -59,7 +59,7 @@ PR の変更内容に基づいて複雑度を判定する:
 
 ## Review Worker prompt file の書き方
 
-`.claude/tasks/prompts/worker-{N}-{subtask_id}.md`:
+`.beeops/tasks/prompts/worker-{N}-{subtask_id}.md`:
 
 ### worker-code-reviewer 用
 ```markdown
@@ -161,7 +161,7 @@ findings:
 
 ## verdict 報告
 
-`review-leader-{N}-verdict.yaml` を `.claude/tasks/reports/` に書き出す:
+`review-leader-{N}-verdict.yaml` を `.beeops/tasks/reports/` に書き出す:
 
 ```yaml
 issue: {N}

@@ -12,7 +12,7 @@ Provides Worker visualization via tmux split-pane, event-driven completion waiti
 
 Before launching a Worker, the Leader/Review Leader must write out a prompt file.
 
-Path: `.claude/tasks/prompts/worker-{issue}-{subtask_id}.md`
+Path: `.beeops/tasks/prompts/worker-{issue}-{subtask_id}.md`
 
 If the prompt file does not exist, `launch-worker.sh` will exit with an error.
 
@@ -79,14 +79,14 @@ done
 
 ### Post-wake determination
 
-Check `.claude/tasks/reports/`:
+Check `.beeops/tasks/reports/`:
 - **New report found** — Normal completion. Proceed to quality evaluation.
 - **No report (timeout)** — Check pane state.
 
 ### State check on timeout
 
 ```bash
-tmux list-panes -t bo:{window_name} -F '#{@agent_label} #{pane_current_command}' 2>/dev/null
+tmux list-panes -t bee-dev:{window_name} -F '#{@agent_label} #{pane_current_command}' 2>/dev/null
 ```
 
 | State | Meaning | Action |
@@ -98,7 +98,7 @@ tmux list-panes -t bo:{window_name} -F '#{@agent_label} #{pane_current_command}'
 ## Report Files
 
 ```
-.claude/tasks/reports/
+.beeops/tasks/reports/
 ├── worker-{N}-{subtask_id}.yaml         # Basic report written by launch-worker.sh (guaranteed)
 └── worker-{N}-{subtask_id}-detail.yaml  # Detail written by Worker (optional)
 ```

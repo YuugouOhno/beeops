@@ -135,6 +135,8 @@ queued -> dispatched -> leader_working -> review_dispatched -> reviewing -> done
 review_dispatched -> reviewing -> done
                                    |
               fixing <-- fix_required
+
+Note: CI check is performed by Leader after PR creation, so Queen's ci_checking phase is not needed
 ```
 
 | Status | Meaning |
@@ -147,7 +149,6 @@ review_dispatched -> reviewing -> done
 | reviewing | Review Leader working |
 | fix_required | Review flagged issues |
 | fixing | Leader applying fixes |
-| ci_checking | Checking CI |
 | done | Complete |
 | stuck | Still failing after 3 fix attempts (awaiting user intervention) |
 | error | Abnormal termination |
@@ -158,7 +159,7 @@ review_dispatched -> reviewing -> done
 2. Skip tasks with a `blocked_reason` (record "Skipped: {reason}" in the log)
 3. Priority order: high -> medium -> low
 4. Within the same priority, process lower Issue numbers first
-5. Maximum parallel tasks: read `max_parallel_leaders` from `.claude/beeops/settings.json` (default: 2 if not set)
+5. Maximum parallel tasks: read `max_parallel_leaders` from `.beeops/settings.json` (default: 2 if not set)
 
 ## queue.yaml Update Rules
 
@@ -191,7 +192,7 @@ After determining the starting point:
 1. Invoke **Skill: `bo-dispatch`** to launch a Leader (or Review Leader if PR exists)
 2. Based on the result (report content) returned by bo-dispatch:
    - Leader completed -> update to `review_dispatched` -> launch Review Leader (invoke bo-dispatch again)
-   - Review Leader approve -> `ci_checking` -> verify CI
+   - Review Leader approve -> `done`
    - Review Leader fix_required -> if review_count < 3, set to `fixing` -> relaunch Leader (fix mode, using existing branch)
    - Failure -> update to `error`
 

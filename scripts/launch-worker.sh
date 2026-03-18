@@ -16,10 +16,10 @@ ROLE="$1"
 ISSUE="$2"
 SUBTASK_ID="$3"
 BRANCH="$4"
-SESSION="bo"
+SESSION="bee-dev"
 REPO_DIR="$(git rev-parse --show-toplevel)"
-REPORTS_DIR="$REPO_DIR/.claude/tasks/reports"
-PROMPTS_DIR="$REPO_DIR/.claude/tasks/prompts"
+REPORTS_DIR="$REPO_DIR/.beeops/tasks/reports"
+PROMPTS_DIR="$REPO_DIR/.beeops/tasks/prompts"
 
 mkdir -p "$REPORTS_DIR/processed" "$PROMPTS_DIR"
 
@@ -80,7 +80,7 @@ PANE_TITLE="${ROLE_ICON} ${ROLE_SHORT}-${ISSUE}-${SUBTASK_ID}"
 SIGNAL_NAME="leader-${ISSUE}-wake"
 
 # ── Determine work directory (use Leader's worktree if available) ──
-WORKTREE_PATH="$REPO_DIR/.claude/worktrees/$BRANCH"
+WORKTREE_PATH="$REPO_DIR/.beeops/worktrees/$BRANCH"
 if [ -d "$WORKTREE_PATH" ]; then
   WORK_DIR="$WORKTREE_PATH"
 else
@@ -126,6 +126,7 @@ env \${ENV_VAR}=1 \
   BO_SCRIPTS_DIR="\$BO_SCRIPTS_DIR" \
   BO_CONTEXTS_DIR="\$BO_CONTEXTS_DIR" \
   claude --dangerously-skip-permissions \
+  --permission-mode bypassPermissions \
   --allowedTools "\$ALLOWED_TOOLS" \
   --max-turns \$MAX_TURNS \
   "\$(cat "\$PROMPT_FILE")"

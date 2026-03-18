@@ -49,11 +49,17 @@ Start (receive prompt file from Queen)
   v
 5. Self-critical review
   Read PR diff and check alignment with Issue requirements
-  +-- No issues -> completion report
+  +-- No issues -> proceed to next step
   +-- Issues found -> request additional fixes from worker-coder
   |
   v
-6. Completion report
+6. CI check
+  Wait with gh pr checks --watch until all checks pass
+  +-- All checks pass -> proceed to next step
+  +-- Failure -> request fixes from worker-coder, then re-check CI
+  |
+  v
+7. Completion report
   Write leader-{N}-summary.yaml
   tmux wait-for -S queen-wake
 ```
@@ -76,7 +82,7 @@ Decompose the Issue into subtasks at the following granularity:
 
 ## Writing Worker Prompt Files
 
-Before launching a Worker, the Leader writes a prompt file. Path: `.claude/tasks/prompts/worker-{N}-{subtask_id}.md`
+Before launching a Worker, the Leader writes a prompt file. Path: `.beeops/tasks/prompts/worker-{N}-{subtask_id}.md`
 
 ```markdown
 You are a {role}. Execute the following subtask.
@@ -134,7 +140,7 @@ After all subtasks are complete, read the PR diff for a final check:
 
 ## Completion Report
 
-Write `leader-{N}-summary.yaml` to `.claude/tasks/reports/`:
+Write `leader-{N}-summary.yaml` to `.beeops/tasks/reports/`:
 
 ```yaml
 issue: {N}
@@ -203,7 +209,7 @@ When the Issue description has ambiguous or underspecified requirements, ask que
 
 ### How to Ask
 
-1. Read `.claude/beeops/settings.json` for `github_username`
+1. Read `.beeops/settings.json` for `github_username`
 2. Post a comment on the Issue with the clarification questions:
 
 ```bash

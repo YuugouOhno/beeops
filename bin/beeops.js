@@ -28,11 +28,19 @@ function resolveSkillSrc(skillName, locale) {
 }
 
 function resolveCommandSrc(locale) {
-  const localePath = path.join(COMMAND_SRC_DIR, locale, "bo.md");
+  const localePath = path.join(COMMAND_SRC_DIR, locale, "bee-dev.md");
   if (fs.existsSync(localePath)) return localePath;
-  const enPath = path.join(COMMAND_SRC_DIR, "en", "bo.md");
+  const enPath = path.join(COMMAND_SRC_DIR, "en", "bee-dev.md");
   if (fs.existsSync(enPath)) return enPath;
-  return path.join(COMMAND_SRC_DIR, "bo.md"); // root fallback (backward compat)
+  return path.join(COMMAND_SRC_DIR, "bee-dev.md"); // root fallback
+}
+
+function resolveContentCommandSrc(locale) {
+  const localePath = path.join(COMMAND_SRC_DIR, locale, "bee-content.md");
+  if (fs.existsSync(localePath)) return localePath;
+  const enPath = path.join(COMMAND_SRC_DIR, "en", "bee-content.md");
+  if (fs.existsSync(enPath)) return enPath;
+  return path.join(COMMAND_SRC_DIR, "bee-content.md"); // root fallback (backward compat)
 }
 
 // ── Helpers ──
@@ -144,16 +152,16 @@ function checkPrerequisites() {
 // Always ignore: runtime artifacts generated during /bo execution
 const GITIGNORE_ALWAYS = [
   "queue.yaml",
-  ".claude/tasks/",
-  ".claude/worktrees/",
+  ".beeops/tasks/",
+  ".beeops/worktrees/",
 ];
 
 // Ignore only for personal (local/global) installs.
 // --shared installs track these files so the whole team gets them.
 const GITIGNORE_LOCAL = [
-  ".claude/commands/bo.md",
+  ".claude/commands/bee-dev.md",
   ".claude/skills/bo-*/",
-  ".claude/beeops/locale",
+  ".beeops/locale",
 ];
 
 function updateGitignore(root, hookMode) {
@@ -270,7 +278,7 @@ function updateSettingsHook(root, mode) {
 // ── Beeops settings helpers ──
 
 function readBeeopsSettings(root) {
-  const file = path.join(root, ".claude", "beeops", "settings.json");
+  const file = path.join(root, ".beeops", "settings.json");
   if (!fs.existsSync(file)) return {};
   try {
     return JSON.parse(fs.readFileSync(file, "utf8"));
@@ -280,7 +288,7 @@ function readBeeopsSettings(root) {
 }
 
 function readLocale(root) {
-  const localeFile = path.join(root, ".claude", "beeops", "locale");
+  const localeFile = path.join(root, ".beeops", "locale");
   if (fs.existsSync(localeFile)) {
     return fs.readFileSync(localeFile, "utf8").trim();
   }
@@ -300,9 +308,9 @@ function detectGithubUsername() {
 }
 
 function writeDefaultSettings(root) {
-  const file = path.join(root, ".claude", "beeops", "settings.json");
+  const file = path.join(root, ".beeops", "settings.json");
   if (fs.existsSync(file)) {
-    console.log(`  settings: .claude/beeops/settings.json already exists, skipping`);
+    console.log(`  settings: .beeops/settings.json already exists, skipping`);
     return;
   }
   const github_username = detectGithubUsername();
@@ -315,18 +323,18 @@ function writeDefaultSettings(root) {
   };
   ensureDir(path.dirname(file));
   fs.writeFileSync(file, JSON.stringify(defaults, null, 2) + "\n");
-  console.log(`  created: .claude/beeops/settings.json (edit to customize /bo behavior)`);
+  console.log(`  created: .beeops/settings.json (edit to customize /bo behavior)`);
   if (github_username) {
     console.log(`  github_username: detected as '${github_username}'`);
   } else {
-    console.log(`  github_username: not detected — set it manually in .claude/beeops/settings.json`);
+    console.log(`  github_username: not detected — set it manually in .beeops/settings.json`);
   }
 }
 
 // ── init ──
 
 function addToProtect(root, key) {
-  const file = path.join(root, ".claude", "beeops", "settings.json");
+  const file = path.join(root, ".beeops", "settings.json");
   const settings = readBeeopsSettings(root);
   const protect = Array.isArray(settings.protect) ? settings.protect : [];
   if (!protect.includes(key)) {
@@ -334,7 +342,7 @@ function addToProtect(root, key) {
     settings.protect = protect;
     ensureDir(path.dirname(file));
     fs.writeFileSync(file, JSON.stringify(settings, null, 2) + "\n");
-    console.log(`  added "${key}" to protect in .claude/beeops/settings.json`);
+    console.log(`  added "${key}" to protect in .beeops/settings.json`);
   }
 }
 
@@ -351,7 +359,8 @@ async function confirmOverwrite(rl, label, protectKey) {
 
 async function initCore(root, opts) {
   const claudeDir = path.join(root, ".claude");
-  const isFirstInit = !fs.existsSync(path.join(claudeDir, "commands", "bo.md"));
+  const isFirstInit = !fs.existsSync(path.join(claudeDir, "commands", "bee-dev.md")) &&
+    !fs.existsSync(path.join(claudeDir, "commands", "bo.md"));
   const settings = readBeeopsSettings(root);
   const protect = Array.isArray(settings.protect) ? settings.protect : [];
 
@@ -381,19 +390,41 @@ async function initCore(root, opts) {
   }
 
   // 1. Copy command (locale-aware)
+  // Migrate: remove old bo.md if bee-dev.md doesn't exist yet
+  const oldCmdPath = path.join(claudeDir, "commands", "bo.md");
+  const newCmdPath = path.join(claudeDir, "commands", "bee-dev.md");
+  if (fs.existsSync(oldCmdPath) && !fs.existsSync(newCmdPath)) {
+    fs.unlinkSync(oldCmdPath);
+    console.log(`  migrated: removed .claude/commands/bo.md`);
+  }
   if (isProtected("command")) {
-    console.log(`  protected: .claude/commands/bo.md (skipped)`);
-  } else if (!isFirstInit && fs.existsSync(path.join(claudeDir, "commands", "bo.md"))) {
+    console.log(`  protected: .claude/commands/bee-dev.md (skipped)`);
+  } else if (!isFirstInit && fs.existsSync(newCmdPath)) {
     if (interactive) {
-      const { skip, addProtect } = await confirmOverwrite(rl, ".claude/commands/bo.md", "command");
+      const { skip, addProtect } = await confirmOverwrite(rl, ".claude/commands/bee-dev.md", "command");
       if (addProtect) addToProtect(root, "command");
-      if (!skip) copyFile(resolveCommandSrc(opts.locale), path.join(claudeDir, "commands", "bo.md"));
-      else console.log(`  skipped: .claude/commands/bo.md`);
+      if (!skip) copyFile(resolveCommandSrc(opts.locale), newCmdPath);
+      else console.log(`  skipped: .claude/commands/bee-dev.md`);
     } else {
-      copyFile(resolveCommandSrc(opts.locale), path.join(claudeDir, "commands", "bo.md"));
+      copyFile(resolveCommandSrc(opts.locale), newCmdPath);
     }
   } else {
-    copyFile(resolveCommandSrc(opts.locale), path.join(claudeDir, "commands", "bo.md"));
+    copyFile(resolveCommandSrc(opts.locale), newCmdPath);
+  }
+
+  // 1b. Copy bee-content command (locale-aware)
+  if (isProtected("command")) {
+    console.log(`  protected: .claude/commands/bee-content.md (skipped)`);
+  } else if (!isFirstInit && fs.existsSync(path.join(claudeDir, "commands", "bee-content.md"))) {
+    if (interactive) {
+      const { skip, addProtect } = await confirmOverwrite(rl, ".claude/commands/bee-content.md", "command");
+      if (!skip) copyFile(resolveContentCommandSrc(opts.locale), path.join(claudeDir, "commands", "bee-content.md"));
+      else console.log(`  skipped: .claude/commands/bee-content.md`);
+    } else {
+      copyFile(resolveContentCommandSrc(opts.locale), path.join(claudeDir, "commands", "bee-content.md"));
+    }
+  } else {
+    copyFile(resolveContentCommandSrc(opts.locale), path.join(claudeDir, "commands", "bee-content.md"));
   }
 
   // 2. Copy skills (locale-aware)
@@ -443,28 +474,28 @@ async function initCore(root, opts) {
   updateSettingsHook(root, opts.hookMode);
 
   // 6. Save locale preference
-  const boDir = path.join(claudeDir, "beeops");
+  const boDir = path.join(root, ".beeops");
   ensureDir(boDir);
   fs.writeFileSync(path.join(boDir, "locale"), opts.locale + "\n");
-  console.log(`  locale: ${opts.locale} (saved to .claude/beeops/locale)`);
+  console.log(`  locale: ${opts.locale} (saved to .beeops/locale)`);
 
   // 7. Write default settings.json (only on first init)
   writeDefaultSettings(root);
 
   // 8. Copy contexts if --with-contexts
   if (opts.withContexts) {
-    const destContexts = path.join(claudeDir, "beeops", "contexts");
+    const destContexts = path.join(root, ".beeops", "contexts");
     if (isProtected("contexts")) {
-      console.log(`  protected: .claude/beeops/contexts/ (skipped)`);
+      console.log(`  protected: .beeops/contexts/ (skipped)`);
     } else if (!isFirstInit && fs.existsSync(destContexts)) {
       if (interactive) {
-        const { skip, addProtect } = await confirmOverwrite(rl, ".claude/beeops/contexts/", "contexts");
+        const { skip, addProtect } = await confirmOverwrite(rl, ".beeops/contexts/", "contexts");
         if (addProtect) addToProtect(root, "contexts");
         if (!skip) {
           copyDir(CONTEXTS_SRC, destContexts);
           console.log("  Contexts copied. Edit files to customize agent behavior.");
         } else {
-          console.log(`  skipped: .claude/beeops/contexts/`);
+          console.log(`  skipped: .beeops/contexts/`);
         }
       } else {
         copyDir(CONTEXTS_SRC, destContexts);
@@ -472,7 +503,7 @@ async function initCore(root, opts) {
       }
     } else {
       copyDir(CONTEXTS_SRC, destContexts);
-      console.log("\n  Contexts copied to .claude/beeops/contexts/ for customization.");
+      console.log("\n  Contexts copied to .beeops/contexts/ for customization.");
       console.log("  Edit these files to customize agent behavior.");
       console.log("  Delete a file to fall back to the package default.");
     }
@@ -482,14 +513,14 @@ async function initCore(root, opts) {
 }
 
 function printSettingsSummary(root) {
-  const file = path.join(root, ".claude", "beeops", "settings.json");
+  const file = path.join(root, ".beeops", "settings.json");
   if (!fs.existsSync(file)) return;
   const settings = readBeeopsSettings(root);
-  console.log("\nCurrent settings (.claude/beeops/settings.json):");
+  console.log("\nCurrent settings (.beeops/settings.json):");
   for (const [k, v] of Object.entries(settings)) {
     console.log(`  ${k}: ${JSON.stringify(v)}`);
   }
-  console.log("\nTo change these, edit .claude/beeops/settings.json directly.");
+  console.log("\nTo change these, edit .beeops/settings.json directly.");
   console.log('To protect files from future updates, add "protect" to settings.json:');
   console.log('  "protect": ["skills", "command", "contexts"]');
 }
@@ -500,10 +531,25 @@ async function init(opts) {
   const root = getProjectRoot();
   console.log(`Initializing beeops in ${root}...\n`);
 
+  // Interactive locale confirmation (TTY only, skip if --locale was explicitly passed)
+  if (!opts._localeExplicit && process.stdin.isTTY) {
+    const { createInterface } = await import("readline/promises");
+    const rl = createInterface({ input: process.stdin, output: process.stdout });
+    const detected = opts.locale;
+    const answer = (await rl.question(
+      `  Locale detected: ${detected}. Press Enter to use it, or type another (${SUPPORTED_LOCALES.join("/")}): `
+    )).trim().toLowerCase();
+    rl.close();
+    if (answer && SUPPORTED_LOCALES.includes(answer)) {
+      opts.locale = answer;
+    }
+    console.log(`  Using locale: ${opts.locale}`);
+  }
+
   await initCore(root, opts);
 
   console.log("\nbeeops initialized successfully!");
-  console.log("Run /bo in Claude Code to start the Queen.");
+  console.log("Run /bee-dev in Claude Code to start the Queen.");
   printSettingsSummary(root);
 }
 
@@ -538,11 +584,11 @@ function check() {
   console.log("Checking beeops setup...\n");
 
   // Check command
-  const cmdPath = path.join(claudeDir, "commands", "bo.md");
+  const cmdPath = path.join(claudeDir, "commands", "bee-dev.md");
   if (fs.existsSync(cmdPath)) {
-    console.log("  [ok] .claude/commands/bo.md");
+    console.log("  [ok] .claude/commands/bee-dev.md");
   } else {
-    console.log("  [missing] .claude/commands/bo.md");
+    console.log("  [missing] .claude/commands/bee-dev.md");
     ok = false;
   }
 
@@ -590,10 +636,10 @@ function check() {
   }
 
   // Check local contexts (informational)
-  const localContexts = path.join(claudeDir, "beeops", "contexts");
+  const localContexts = path.join(root, ".beeops", "contexts");
   if (fs.existsSync(localContexts)) {
     const files = fs.readdirSync(localContexts);
-    console.log(`  [info] .claude/beeops/contexts/ (${files.length} custom file(s))`);
+    console.log(`  [info] .beeops/contexts/ (${files.length} custom file(s))`);
   }
 
   // Check package resolvable
@@ -622,8 +668,8 @@ function printHelp() {
   console.log("  --shared         Register hook in .claude/settings.json (team-shared)");
   console.log("  -g, --global     Register hook in ~/.claude/settings.json (all projects)");
   console.log("  --with-contexts  Copy default contexts for customization");
-  console.log("  --locale <lang>  Set locale (default: en, available: en, ja)\n");
-  console.log("To change settings after init, edit .claude/beeops/settings.json directly.\n");
+  console.log("  --locale <lang>  Set locale (auto-detected from system, available: en, ja)\n");
+  console.log("To change settings after init, edit .beeops/settings.json directly.\n");
   console.log("Examples:");
   console.log("  npx beeops init");
   console.log("  npx beeops init --shared --locale ja");
@@ -636,6 +682,28 @@ function printVersion() {
   console.log(`beeops v${pkg.version}`);
 }
 
+// ── Locale auto-detection ──
+
+function detectSystemLocale() {
+  // 1. Environment variables (LANG, LC_ALL, LC_MESSAGES)
+  const envLocale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG || "";
+  if (envLocale.toLowerCase().startsWith("ja")) return "ja";
+
+  // 2. macOS: AppleLanguages preference
+  try {
+    const result = execSync("defaults read NSGlobalDomain AppleLanguages 2>/dev/null", {
+      encoding: "utf8", stdio: "pipe",
+    }).trim();
+    // result looks like: ("ja", "en-JP", ...)
+    const first = result.match(/"([^"]+)"/);
+    if (first && first[1].toLowerCase().startsWith("ja")) return "ja";
+  } catch {
+    // ignore
+  }
+
+  return "en";
+}
+
 // ── Argument parsing ──
 
 function parseArgs(argv) {
@@ -643,8 +711,10 @@ function parseArgs(argv) {
   const opts = {
     hookMode: "local",
     withContexts: false,
-    locale: "en",
+    locale: detectSystemLocale(),
+    _localeExplicit: false,
   };
+
 
   // Check for help/version flags first (anywhere in args)
   if (args.includes("-h") || args.includes("--help") || args.includes("help")) {
@@ -676,6 +746,7 @@ function parseArgs(argv) {
       case "--locale":
         if (args[i + 1]) {
           opts.locale = args[++i];
+          opts._localeExplicit = true;
         }
         break;
     }

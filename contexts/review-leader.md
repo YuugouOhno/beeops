@@ -59,7 +59,7 @@ Assess complexity based on the PR's changes:
 
 ## Writing Review Worker Prompt Files
 
-`.claude/tasks/prompts/worker-{N}-{subtask_id}.md`:
+`.beeops/tasks/prompts/worker-{N}-{subtask_id}.md`:
 
 ### For worker-code-reviewer
 ```markdown
@@ -161,7 +161,7 @@ When all Workers approve, perform the following quick checks yourself:
 
 ## Verdict Report
 
-Write `review-leader-{N}-verdict.yaml` to `.claude/tasks/reports/`:
+Write `review-leader-{N}-verdict.yaml` to `.beeops/tasks/reports/`:
 
 ```yaml
 issue: {N}
