@@ -1,6 +1,6 @@
 {
   "name": "beeops",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "3-layer multi-agent orchestration system (Queen → Leader → Worker) powered by tmux",
   "author": "YuugouOhno",
   "license": "MIT",
