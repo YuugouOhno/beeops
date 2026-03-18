@@ -1,0 +1,139 @@
+{
+  "modes": {
+    "BO_QUEEN": {
+      "context": ["queen.md"],
+
+      "description": "beeops L1：Queen（总指挥）"
+    },
+    "BO_LEADER": {
+      "context": ["leader.md"],
+
+      "description": "beeops L2：Leader（实现负责人）"
+    },
+    "BO_REVIEW_LEADER": {
+      "context": ["review-leader.md"],
+
+      "description": "beeops L2：Review Leader（评审负责人）"
+    },
+    "BO_WORKER_CODER": {
+      "context": ["worker-base.md", "coder.md"],
+
+      "description": "beeops L3：Worker（实现）"
+    },
+    "BO_WORKER_TESTER": {
+      "context": ["worker-base.md", "tester.md"],
+
+      "description": "beeops L3：Worker（编写测试）"
+    },
+    "BO_WORKER_CODE_REVIEWER": {
+      "context": ["reviewer-base.md", "code-reviewer.md"],
+
+      "description": "beeops L3：Worker（代码审查）"
+    },
+    "BO_WORKER_SECURITY": {
+      "context": ["reviewer-base.md", "security-reviewer.md"],
+
+      "description": "beeops L3：Worker（安全审查）"
+    },
+    "BO_WORKER_TEST_AUDITOR": {
+      "context": ["reviewer-base.md", "test-auditor.md"],
+
+      "description": "beeops L3：Worker（测试审计）"
+    },
+    "BO_CONTENT_QUEEN": {
+      "context": ["content-queen.md"],
+      "description": "bee-content L1：Content Queen（总指挥）"
+    },
+    "BO_CONTENT_LEADER": {
+      "context": ["content-leader.md"],
+      "description": "bee-content L2：Content Leader（内容制作负责人）"
+    },
+    "BO_CONTENT_CREATOR": {
+      "context": ["content-creator.md"],
+      "description": "bee-content L3：Worker（内容创作）"
+    },
+    "BO_CONTENT_REVIEWER": {
+      "context": ["content-reviewer.md"],
+      "description": "bee-content L3：Worker（内容审查）"
+    },
+    "BO_CONTENT_RESEARCHER": {
+      "context": ["content-researcher.md"],
+      "description": "bee-content L3：Worker（调研）"
+    }
+  },
+  "roles": {
+    "leader": {
+      "env_var": "BO_LEADER",
+      "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
+      "max_turns": 80,
+      "description": "beeops：某 Issue 的实现负责人"
+    },
+    "review-leader": {
+      "env_var": "BO_REVIEW_LEADER",
+      "allowed_tools": "Read Grep Glob Bash Skill",
+      "max_turns": 40,
+      "description": "beeops：某 PR 的评审负责人"
+    },
+    "worker-coder": {
+      "env_var": "BO_WORKER_CODER",
+      "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
+      "max_turns": 30,
+      "description": "beeops：单个子任务的实现"
+    },
+    "worker-tester": {
+      "env_var": "BO_WORKER_TESTER",
+      "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
+      "max_turns": 30,
+      "description": "beeops：为子任务编写测试"
+    },
+    "worker-code-reviewer": {
+      "env_var": "BO_WORKER_CODE_REVIEWER",
+      "allowed_tools": "Read Grep Glob Bash Skill",
+      "max_turns": 15,
+      "description": "beeops：代码质量审查"
+    },
+    "worker-security": {
+      "env_var": "BO_WORKER_SECURITY",
+      "allowed_tools": "Read Grep Glob Bash Skill",
+      "max_turns": 15,
+      "description": "beeops：安全审查"
+    },
+    "worker-test-auditor": {
+      "env_var": "BO_WORKER_TEST_AUDITOR",
+      "allowed_tools": "Read Grep Glob Bash Skill",
+      "max_turns": 15,
+      "description": "beeops：测试审计"
+    },
+    "content-queen": {
+      "env_var": "BO_CONTENT_QUEEN",
+      "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
+      "max_turns": 80,
+      "description": "bee-content：统筹所有内容创作任务"
+    },
+    "content-leader": {
+      "env_var": "BO_CONTENT_LEADER",
+      "allowed_tools": "Read Write Edit Bash Glob Grep Skill",
+      "max_turns": 50,
+      "description": "bee-content：负责单篇内容的制作"
+    },
+    "content-creator": {
+      "env_var": "BO_CONTENT_CREATOR",
+      "allowed_tools": "Read Write Edit Bash Glob Grep",
+      "max_turns": 30,
+      "description": "bee-content：内容创作 Worker"
+    },
+    "content-reviewer": {
+      "env_var": "BO_CONTENT_REVIEWER",
+      "allowed_tools": "Read Bash Glob Grep",
+      "max_turns": 20,
+      "description": "bee-content：内容审查 Worker"
+    },
+    "content-researcher": {
+      "env_var": "BO_CONTENT_RESEARCHER",
+      "allowed_tools": "Read Bash Glob Grep WebSearch WebFetch",
+      "max_turns": 20,
+      "description": "bee-content：调研与信息收集 Worker"
+    }
+  },
+  "default_context": "default.md"
+}

@@ -553,7 +553,7 @@ async function init(opts) {
   printSettingsSummary(root);
 }
 
-const SUPPORTED_LOCALES = ["en", "ja"];
+const SUPPORTED_LOCALES = ["en", "ja", "zh"];
 
 // ── check ──
 
@@ -668,7 +668,7 @@ function printHelp() {
   console.log("  --shared         Register hook in .claude/settings.json (team-shared)");
   console.log("  -g, --global     Register hook in ~/.claude/settings.json (all projects)");
   console.log("  --with-contexts  Copy default contexts for customization");
-  console.log("  --locale <lang>  Set locale (auto-detected from system, available: en, ja)\n");
+  console.log("  --locale <lang>  Set locale (auto-detected from system, available: en, ja, zh)\n");
   console.log("To change settings after init, edit .beeops/settings.json directly.\n");
   console.log("Examples:");
   console.log("  npx beeops init");
@@ -687,7 +687,9 @@ function printVersion() {
 function detectSystemLocale() {
   // 1. Environment variables (LANG, LC_ALL, LC_MESSAGES)
   const envLocale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG || "";
-  if (envLocale.toLowerCase().startsWith("ja")) return "ja";
+  const envLower = envLocale.toLowerCase();
+  if (envLower.startsWith("ja")) return "ja";
+  if (envLower.startsWith("zh")) return "zh";
 
   // 2. macOS: AppleLanguages preference
   try {
@@ -696,7 +698,11 @@ function detectSystemLocale() {
     }).trim();
     // result looks like: ("ja", "en-JP", ...)
     const first = result.match(/"([^"]+)"/);
-    if (first && first[1].toLowerCase().startsWith("ja")) return "ja";
+    if (first) {
+      const lang = first[1].toLowerCase();
+      if (lang.startsWith("ja")) return "ja";
+      if (lang.startsWith("zh")) return "zh";
+    }
   } catch {
     // ignore
   }
