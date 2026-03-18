@@ -101,6 +101,9 @@ read $TASK_DIR/prompts/reviewer-result-{PIECE_ID}.yaml
 assessment = result.assessment
 score = result.score
 
+# 关闭已完成 piece 的窗口（Leader 和 Reviewer 均已完成）
+tmux kill-window -t "bee-content:piece-{PIECE_ID}" 2>/dev/null || true
+
 process verdict（见步骤 3）
 append decision to loop.log
 ```

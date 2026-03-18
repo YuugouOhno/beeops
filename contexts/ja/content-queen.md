@@ -101,6 +101,9 @@ $TASK_DIR/prompts/reviewer-result-{PIECE_ID}.yaml を読む
 assessment = result.assessment
 score = result.score
 
+# 完了したピースのウィンドウを閉じる（Leader・Reviewer ともに完了済み）
+tmux kill-window -t "bee-content:piece-{PIECE_ID}" 2>/dev/null || true
+
 verdict を処理（ステップ3参照）
 loop.log に決定内容を追記
 ```

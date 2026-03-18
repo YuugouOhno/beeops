@@ -101,6 +101,9 @@ lee $TASK_DIR/prompts/reviewer-result-{PIECE_ID}.yaml
 assessment = result.assessment
 score = result.score
 
+# Cierra la ventana del piece completado (Leader y Reviewer han terminado)
+tmux kill-window -t "bee-content:piece-{PIECE_ID}" 2>/dev/null || true
+
 procesa el veredicto (ver Paso 3)
 agrega la decisión a loop.log
 ```

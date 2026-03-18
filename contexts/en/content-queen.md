@@ -101,6 +101,9 @@ read $TASK_DIR/prompts/reviewer-result-{PIECE_ID}.yaml
 assessment = result.assessment
 score = result.score
 
+# Close completed piece window (Leader and Reviewer are both done)
+tmux kill-window -t "bee-content:piece-{PIECE_ID}" 2>/dev/null || true
+
 process verdict (see Step 3)
 append decision to loop.log
 ```
