@@ -498,8 +498,9 @@ async function initCore(root, opts) {
   // 7. Write default settings.json (only on first init)
   writeDefaultSettings(root);
 
-  // 8. Copy contexts if --with-contexts
+  // 8. Copy contexts
   if (opts.withContexts) {
+    // --with-contexts: copy all locales (explicit request)
     const destContexts = path.join(root, ".beeops", "contexts");
     if (isProtected("contexts")) {
       console.log(`  protected: .beeops/contexts/ (skipped)`);
@@ -520,6 +521,16 @@ async function initCore(root, opts) {
     } else {
       copyDir(CONTEXTS_SRC, destContexts);
       console.log("\n  Contexts copied to .beeops/contexts/ for customization.");
+      console.log("  Edit these files to customize agent behavior.");
+      console.log("  Delete a file to fall back to the package default.");
+    }
+  } else if (isFirstInit) {
+    // First init without --with-contexts: auto-copy locale-specific contexts only
+    const destContexts = path.join(root, ".beeops", "contexts");
+    const localeSrc = path.join(CONTEXTS_SRC, opts.locale);
+    if (fs.existsSync(localeSrc)) {
+      copyDir(localeSrc, path.join(destContexts, opts.locale));
+      console.log(`\n  Contexts (${opts.locale}) copied to .beeops/contexts/${opts.locale}/ for customization.`);
       console.log("  Edit these files to customize agent behavior.");
       console.log("  Delete a file to fall back to the package default.");
     }

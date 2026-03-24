@@ -170,6 +170,16 @@ npx beeops config locale ja       # Change locale, re-copy skills/command
 
 `config locale` re-copies skills and command for the new locale without touching existing hook registration or contexts.
 
+### Adding a New Locale to the Package
+
+When adding a new language (e.g., `fr`), update all three locations:
+
+1. `contexts/<locale>/` — translate all context files (copy from `en/` as base)
+2. `command/<locale>/` — translate all command files (`bee-dev.md`, `bee-content.md`, etc.)
+3. `bin/beeops.js` — add to `SUPPORTED_LOCALES` array + system locale auto-detection
+
+Missing any of these causes silent fallback to English, which may not be obvious until a user reports it.
+
 ## Settings File (`.claude/beeops/settings.json`)
 
 Optional configuration file to control `/bo` execution behavior. When present, the `/bo` command reads this file and builds the Queen's instruction automatically. When absent, the user is prompted interactively.
